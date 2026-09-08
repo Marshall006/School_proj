@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# Node
+node_modules/
+.next/
+dist/
+.expo/
+*.tsbuildinfo
+
+# Donnees locales
+*.db
+*.sqlite3
+.env
+.env.local
+
+# Systeme
+.DS_Store
+
+# Outils locaux
+.ruff_cache/
+*.deb
+playwright-report/
+test-results/

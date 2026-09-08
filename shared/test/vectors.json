@@ -1,0 +1,240 @@
+{
+  "protocol": "KODA1",
+  "code_digits": 10,
+  "tag_digits": 7,
+  "duration_step_minutes": 5,
+  "secret_hex": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+  "device_id": "3f2504e0-4f89-11d3-9a0c-0305e82c3301",
+  "bucket_seconds": {
+    "0": 1800,
+    "1": 1800,
+    "2": 1800,
+    "3": 1800,
+    "4": 43200
+  },
+  "issue": [
+    {
+      "counter": 1,
+      "duration_minutes": 30,
+      "kind": 0,
+      "now": 1800000000.0,
+      "code": "0606482438",
+      "formatted": "060 648 2438",
+      "fingerprint": "dbac8a27fdd2fe09a37189911debb9ec1ec7f6b8e660ca7476860266560b02e7"
+    },
+    {
+      "counter": 2,
+      "duration_minutes": 180,
+      "kind": 0,
+      "now": 1800000000.0,
+      "code": "3600442254",
+      "formatted": "360 044 2254",
+      "fingerprint": "14db8fa53b3f014f82bc5eb72b46b3569948b57824987699d6892cca8ebdbb5f"
+    },
+    {
+      "counter": 7,
+      "duration_minutes": 90,
+      "kind": 1,
+      "now": 1800001234.0,
+      "code": "1815046616",
+      "formatted": "181 504 6616",
+      "fingerprint": "581a335874155d2b1c471f5328e714cb205e9f58d99eacbc5278c39d11118764"
+    },
+    {
+      "counter": 12,
+      "duration_minutes": 45,
+      "kind": 2,
+      "now": 1800005000.0,
+      "code": "0924251869",
+      "formatted": "092 425 1869",
+      "fingerprint": "12857475c153c6b15d69d01036c97cc402a89e116ca866a8aab3c85f7bb6f80f"
+    },
+    {
+      "counter": 99,
+      "duration_minutes": 495,
+      "kind": 3,
+      "now": 1800099999.0,
+      "code": "9933842054",
+      "formatted": "993 384 2054",
+      "fingerprint": "82fa39fabe7f70773be6ac25d61a91896766fb242f45da18dd71d5f41c3d8cb4"
+    },
+    {
+      "counter": 3,
+      "duration_minutes": 60,
+      "kind": 4,
+      "now": 1800000000.0,
+      "code": "1248746304",
+      "formatted": "124 874 6304",
+      "fingerprint": "95382481b010af5781e458ed73d59e57135f6ffcb4dc8febfd858aa52f949d7d"
+    },
+    {
+      "counter": 250,
+      "duration_minutes": 5,
+      "kind": 0,
+      "now": 1800000042.0,
+      "code": "0106768362",
+      "formatted": "010 676 8362",
+      "fingerprint": "a6b3c6fecc233df13969f199f40e6d6caf97512869aef8cd25adc9464b78ceb3"
+    }
+  ],
+  "verify": [
+    {
+      "label": "valide c=1",
+      "code": "0606482438",
+      "last_counter": 0,
+      "now": 1800000000.0,
+      "expect": {
+        "ok": true,
+        "counter": 1,
+        "duration_minutes": 30,
+        "kind": 0
+      }
+    },
+    {
+      "label": "valide c=2",
+      "code": "3600442254",
+      "last_counter": 1,
+      "now": 1800000000.0,
+      "expect": {
+        "ok": true,
+        "counter": 2,
+        "duration_minutes": 180,
+        "kind": 0
+      }
+    },
+    {
+      "label": "valide c=7",
+      "code": "1815046616",
+      "last_counter": 6,
+      "now": 1800001234.0,
+      "expect": {
+        "ok": true,
+        "counter": 7,
+        "duration_minutes": 90,
+        "kind": 1
+      }
+    },
+    {
+      "label": "valide c=12",
+      "code": "0924251869",
+      "last_counter": 11,
+      "now": 1800005000.0,
+      "expect": {
+        "ok": true,
+        "counter": 12,
+        "duration_minutes": 45,
+        "kind": 2
+      }
+    },
+    {
+      "label": "valide c=99",
+      "code": "9933842054",
+      "last_counter": 98,
+      "now": 1800099999.0,
+      "expect": {
+        "ok": true,
+        "counter": 99,
+        "duration_minutes": 495,
+        "kind": 3
+      }
+    },
+    {
+      "label": "valide c=3",
+      "code": "1248746304",
+      "last_counter": 2,
+      "now": 1800000000.0,
+      "expect": {
+        "ok": true,
+        "counter": 3,
+        "duration_minutes": 60,
+        "kind": 4
+      }
+    },
+    {
+      "label": "valide c=250",
+      "code": "0106768362",
+      "last_counter": 249,
+      "now": 1800000042.0,
+      "expect": {
+        "ok": true,
+        "counter": 250,
+        "duration_minutes": 5,
+        "kind": 0
+      }
+    },
+    {
+      "label": "rejeu refuse",
+      "code": "0606482438",
+      "last_counter": 1,
+      "now": 1800000000.0,
+      "expect": {
+        "ok": false
+      }
+    },
+    {
+      "label": "hors fenetre de compteur",
+      "code": "0606482438",
+      "last_counter": -40,
+      "now": 1800000000.0,
+      "expect": {
+        "ok": false
+      }
+    },
+    {
+      "label": "tolerance -1 tranche",
+      "code": "0606482438",
+      "last_counter": 0,
+      "now": 1799998300.0,
+      "expect": {
+        "ok": true,
+        "counter": 1
+      }
+    },
+    {
+      "label": "tolerance +1 tranche",
+      "code": "0606482438",
+      "last_counter": 0,
+      "now": 1800001900.0,
+      "expect": {
+        "ok": true,
+        "counter": 1
+      }
+    },
+    {
+      "label": "hors fenetre temporelle",
+      "code": "0606482438",
+      "last_counter": 0,
+      "now": 1800007200.0,
+      "expect": {
+        "ok": false
+      }
+    },
+    {
+      "label": "chiffre altere",
+      "code": "0606492438",
+      "last_counter": 0,
+      "now": 1800000000.0,
+      "expect": {
+        "ok": false
+      }
+    },
+    {
+      "label": "duree falsifiee",
+      "code": "9906482438",
+      "last_counter": 0,
+      "now": 1800000000.0,
+      "expect": {
+        "ok": false
+      }
+    },
+    {
+      "label": "code trop court",
+      "code": "12345",
+      "last_counter": 0,
+      "now": 1800000000.0,
+      "expect": {
+        "ok": false
+      }
+    }
+  ]
+}

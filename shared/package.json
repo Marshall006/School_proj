@@ -1,0 +1,21 @@
+{
+  "name": "@koda/shared",
+  "version": "1.0.0",
+  "description": "Protocole de deverrouillage et types partages entre l'API, le tableau de bord et l'application enfant",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./src/*": "./src/*"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node test/run.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:integration": "npm run build && node test/appareil-hors-ligne.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

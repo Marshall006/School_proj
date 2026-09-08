@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  api:
+    name: API (tests + analyse statique)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Installer les dependances
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e "backend[dev]"
+
+      - name: Analyse statique
+        run: ruff check backend/app backend/tests
+
+      - name: Tests avec couverture
+        working-directory: backend
+        run: pytest -q --cov --cov-report=term --cov-fail-under=85
+
+      - name: Verifier les migrations
+        working-directory: backend
+        env:
+          KODA_DATABASE_URL: sqlite+aiosqlite:///./ci.db
+        run: |
+          alembic upgrade head
+          alembic downgrade base
+
+  shared:
+    name: Protocole partage (equivalence Python / TypeScript)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - working-directory: shared
+        run: |
+          npm install
+          npm test
+
+  web:
+    name: Tableau de bord parental
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Construire le module partage
+        working-directory: shared
+        run: npm install && npm run build
+      - working-directory: web
+        run: |
+          npm install
+          npm run typecheck
+          npm run build
+
+  mobile:
+    name: Application enfant
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - working-directory: mobile
+        run: |
+          npm install
+          npx tsc --noEmit
+          npx expo export --platform android --output-dir /tmp/koda-bundle
