@@ -37,8 +37,17 @@ install-api: ## Installe uniquement l'API
 # --- Execution -------------------------------------------------------------
 
 .PHONY: api
-api: ## Lance l'API en rechargement automatique (port 8000)
-	cd $(BACKEND) && ../$(PY) -m uvicorn app.main:app --reload --port 8000
+api: ## Lance l'API en rechargement automatique (port 8000, accessible sur le reseau)
+	cd $(BACKEND) && ../$(PY) -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+.PHONY: ip
+ip: ## Affiche l'adresse a utiliser depuis une tablette du reseau
+	@echo "Adresse de cette machine : $$(hostname -I | awk '{print $$1}')"
+	@echo "A mettre dans mobile/.env :"
+	@echo "  EXPO_PUBLIC_API_URL=http://$$(hostname -I | awk '{print $$1}'):8000/api/v1"
+	@echo
+	@echo "Sous WSL, cette adresse n'est PAS joignable depuis le reseau local."
+	@echo "Utilisez plutot : cd mobile && npx expo start --tunnel"
 
 .PHONY: web
 web: ## Lance le tableau de bord parent (port 3000)

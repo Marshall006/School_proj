@@ -63,6 +63,29 @@ make mobile      # Expo (tablette ou émulateur)
 > PostgreSQL, renseignez `KODA_DATABASE_URL` dans `.env` — c'est ce que fait
 > `docker compose`.
 
+### Tester l'application enfant
+
+`make mobile` lance Expo. Reste à lui dire où joindre l'API : `localhost` ne
+désigne pas la même machine selon l'endroit où tourne l'application.
+
+| L'app tourne sur… | `EXPO_PUBLIC_API_URL` dans `mobile/.env` |
+|---|---|
+| Émulateur Android | `http://10.0.2.2:8000/api/v1` |
+| Simulateur iOS | `http://localhost:8000/api/v1` |
+| Tablette réelle | `http://<adresse de votre machine>:8000/api/v1` |
+
+`make ip` affiche l'adresse à utiliser. `make api` écoute sur toutes les
+interfaces, donc l'appareil peut l'atteindre.
+
+> **Sous WSL**, l'adresse affichée est celle de la machine virtuelle Linux :
+> elle n'est pas joignable depuis le réseau local sans redirection de ports
+> côté Windows. Le plus simple est alors `cd mobile && npx expo start --tunnel`,
+> qui fonctionne quelle que soit la topologie réseau.
+
+Une fois l'application lancée : générez un code d'appairage depuis le tableau
+de bord (**Appareils → Appairer pour…**), saisissez-le sur la tablette, et vous
+êtes dans le parcours enfant.
+
 ---
 
 ## Le parcours, de bout en bout
