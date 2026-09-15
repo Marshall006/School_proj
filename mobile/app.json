@@ -6,24 +6,28 @@
     "orientation": "default",
     "scheme": "koda",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    "splash": {
-      "resizeMode": "contain",
-      "backgroundColor": "#0f172a"
-    },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.koda.enfant"
     },
     "android": {
       "package": "app.koda.enfant",
-      "adaptiveIcon": { "backgroundColor": "#0f172a" },
-      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE"]
+      "adaptiveIcon": {
+        "backgroundColor": "#0f172a"
+      },
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ]
     },
-    "web": { "bundler": "metro" },
-    "extra": {
-      "apiUrl": "http://localhost:8000/api/v1"
-    }
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-secure-store"
+    ]
   }
 }

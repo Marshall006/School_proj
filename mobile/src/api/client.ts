@@ -15,13 +15,38 @@ import type {
   Submission,
 } from "@koda/shared";
 
+import Constants from "expo-constants";
+
 import { storage } from "../lib/storage";
 
 const DEFAULT_URL = "http://localhost:8000/api/v1";
 
+/**
+ * Adresse de l'API, par ordre de priorite :
+ *
+ * 1. `EXPO_PUBLIC_API_URL` si elle est definie (build de production, API
+ *    distante) ;
+ * 2. en developpement, le serveur Expo qui a servi l'application : il relaie
+ *    `/api/*` vers l'API locale (voir `metro.config.js`). Le telephone joint
+ *    donc l'API par la meme adresse que le bundle — IP locale en mode LAN,
+ *    domaine `exp.direct` en HTTPS en mode tunnel — sans rien configurer ;
+ * 3. a defaut, `localhost` (simulateur sur la meme machine).
+ */
 export function apiUrl(): string {
   const fromEnv = process.env.EXPO_PUBLIC_API_URL;
-  return fromEnv && fromEnv.length > 0 ? fromEnv : DEFAULT_URL;
+  if (fromEnv && fromEnv.length > 0) return fromEnv.replace(/\/+$/, "");
+
+  const hostUri = Constants.expoConfig?.hostUri;
+  if (hostUri) {
+    const host = hostUri.split("/")[0];
+    // Un relais public (tunnel) est expose en HTTPS : sans port, ou sur 443.
+    // Le mode reseau local porte le port de Metro (8081) et reste en HTTP.
+    const port = host.match(/:(\d+)$/)?.[1];
+    const secure = port === undefined || port === "443";
+    const authority = port === "443" ? host.replace(/:443$/, "") : host;
+    return `${secure ? "https" : "http"}://${authority}/api/v1`;
+  }
+  return DEFAULT_URL;
 }
 
 export class NetworkError extends Error {

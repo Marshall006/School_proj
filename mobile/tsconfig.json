@@ -3,11 +3,22 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": ["./src/*"],
-      "@koda/shared": ["../shared/src/index.ts"],
-      "@koda/shared/*": ["../shared/src/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@koda/shared": [
+        "../shared/src/index.ts"
+      ],
+      "@koda/shared/*": [
+        "../shared/src/*"
+      ]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

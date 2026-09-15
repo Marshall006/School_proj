@@ -63,13 +63,65 @@ make mobile      # Expo (tablette ou émulateur)
 > PostgreSQL, renseignez `KODA_DATABASE_URL` dans `.env` — c'est ce que fait
 > `docker compose`.
 
-### Tester l'application enfant
+### Tester sur un téléphone (Expo Go)
 
-`make mobile` lance Expo. Reste à lui dire où joindre l'API : `localhost` ne
-désigne pas la même machine selon l'endroit où tourne l'application.
+Le téléphone doit être sur le **même Wi-Fi** que l'ordinateur. Aucune adresse
+d'API à configurer : en développement, l'application joint l'API **à travers
+le serveur Expo**, qui relaie `/api/*` vers `make api` (voir
+`mobile/metro.config.js`). Le téléphone n'a qu'une adresse à joindre, celle qui
+lui sert déjà l'application.
 
-| L'app tourne sur… | `EXPO_PUBLIC_API_URL` dans `mobile/.env` |
+```bash
+make api      # terminal 1
+make mobile   # terminal 2 — scannez le QR code avec l'appareil photo de l'iPhone
+```
+
+Puis, sur le tableau de bord : **Appareils → Appairer pour…**, et saisissez le
+code sur le téléphone.
+
+#### Sous WSL : activer le mode réseau miroir (une seule fois)
+
+En mode NAT (le défaut), Linux a une adresse interne `172.x` invisible du réseau
+local. Le QR code pointe vers elle, le téléphone ne la trouve jamais : il tourne
+en boucle, puis affiche *« There was a problem running the requested
+project »*. `make mobile` détecte ce cas et s'arrête avec un message plutôt que
+de produire un QR code inutilisable.
+
+Dans **PowerShell ouvert en administrateur** (Windows 11 22H2 ou plus récent) :
+
+```powershell
+# 1. WSL partage les interfaces réseau de Windows.
+#    (Si vous avez déjà un .wslconfig, ajoutez plutôt la ligne sous [wsl2].)
+Set-Content -Path "$env:USERPROFILE\.wslconfig" -Value "[wsl2]`nnetworkingMode=mirrored"
+
+# 2. Autoriser le port d'Expo vers WSL (le pare-feu Hyper-V bloque tout par défaut).
+New-NetFirewallHyperVRule -Name "KODA-Expo" -DisplayName "KODA Expo (8081)" `
+  -Direction Inbound -VMCreatorId '{40E0AC32-46A5-438A-A0B2-2B479E8F2E90}' `
+  -Protocol TCP -LocalPorts 8081
+
+# 3. Même autorisation dans le pare-feu Windows, sur les réseaux privés seulement.
+New-NetFirewallRule -DisplayName "KODA Expo (8081)" -Direction Inbound `
+  -Protocol TCP -LocalPort 8081 -Action Allow -Profile Private
+
+# 4. Redémarrer WSL pour appliquer le mode miroir.
+wsl --shutdown
+```
+
+Rouvrez le terminal : `wslinfo --networking-mode` doit répondre `mirrored`, et
+le QR code de `make mobile` doit afficher l'adresse Wi-Fi de l'ordinateur
+(`192.168.x.x`). Le port 8000 de l'API n'a pas besoin d'être ouvert : il passe
+par le relais.
+
+#### Si le téléphone tourne encore en boucle
+
+| Vérification | Où |
 |---|---|
+| Le Wi-Fi Windows est en **réseau privé** (la règle 3 ne s'applique pas aux réseaux publics) | Paramètres → Réseau et Internet → Wi-Fi → Type de profil réseau |
+| Expo Go a le droit d'accéder au **réseau local** (iOS le demande au premier lancement ; un refus fait tourner en boucle) | iPhone : Réglages → Confidentialité et sécurité → Réseau local → Expo Go |
+| Téléphone et ordinateur sur le **même** Wi-Fi, sans « isolation des clients » (fréquente sur les réseaux invités) | Box / point d'accès |
+| Un seul serveur Expo tourne (un ancien sur le port 8081 bloque le nouveau) | `Ctrl+C` dans l'ancien terminal |
+
+---|---|
 | Émulateur Android | `http://10.0.2.2:8000/api/v1` |
 | Simulateur iOS | `http://localhost:8000/api/v1` |
 | Tablette réelle | `http://<adresse de votre machine>:8000/api/v1` |
