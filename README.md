@@ -68,54 +68,67 @@ make mobile      # Expo (tablette ou émulateur)
 Le téléphone doit être sur le **même Wi-Fi** que l'ordinateur. Aucune adresse
 d'API à configurer : en développement, l'application joint l'API **à travers
 le serveur Expo**, qui relaie `/api/*` vers `make api` (voir
-`mobile/metro.config.js`). Le téléphone n'a qu'une adresse à joindre, celle qui
-lui sert déjà l'application.
+`mobile/metro.config.js`). Le téléphone n'a donc qu'un seul port à joindre,
+celui qui lui sert déjà l'application.
 
 ```bash
-make api      # terminal 1
-make mobile   # terminal 2 — scannez le QR code avec l'appareil photo de l'iPhone
+make api            # terminal 1
+make mobile         # terminal 2 — scannez le QR avec l'appareil photo de l'iPhone
+make mobile-check   # diagnostic réseau, sans rien lancer
 ```
 
 Puis, sur le tableau de bord : **Appareils → Appairer pour…**, et saisissez le
 code sur le téléphone.
 
-#### Sous WSL : activer le mode réseau miroir (une seule fois)
+#### Sous WSL : ouvrir un pont vers Windows
 
-En mode NAT (le défaut), Linux a une adresse interne `172.x` invisible du réseau
-local. Le QR code pointe vers elle, le téléphone ne la trouve jamais : il tourne
-en boucle, puis affiche *« There was a problem running the requested
-project »*. `make mobile` détecte ce cas et s'arrête avec un message plutôt que
-de produire un QR code inutilisable.
+En mode NAT (le défaut), Linux a une adresse interne `172.x` invisible du
+réseau local. `make mobile` la détecte, affiche la commande exacte à passer, et
+demande à Expo d'annoncer l'adresse Wi-Fi de Windows à la place.
 
-Dans **PowerShell ouvert en administrateur** (Windows 11 22H2 ou plus récent) :
+Une seule commande, dans **PowerShell en administrateur** — `make mobile`
+l'affiche déjà remplie avec l'adresse WSL du moment :
 
 ```powershell
-# 1. WSL partage les interfaces réseau de Windows.
-#    (Si vous avez déjà un .wslconfig, ajoutez plutôt la ligne sous [wsl2].)
-Set-Content -Path "$env:USERPROFILE\.wslconfig" -Value "[wsl2]`nnetworkingMode=mirrored"
+netsh interface portproxy add v4tov4 listenport=8081 listenaddress=0.0.0.0 connectport=8081 connectaddress=<adresse-WSL>
 
-# 2. Autoriser le port d'Expo vers WSL (le pare-feu Hyper-V bloque tout par défaut).
-New-NetFirewallHyperVRule -Name "KODA-Expo" -DisplayName "KODA Expo (8081)" `
-  -Direction Inbound -VMCreatorId '{40E0AC32-46A5-438A-A0B2-2B479E8F2E90}' `
-  -Protocol TCP -LocalPorts 8081
-
-# 3. Même autorisation dans le pare-feu Windows, sur les réseaux privés seulement.
+# Et, la première fois seulement, autoriser le port dans le pare-feu :
 New-NetFirewallRule -DisplayName "KODA Expo (8081)" -Direction Inbound `
   -Protocol TCP -LocalPort 8081 -Action Allow -Profile Private
-
-# 4. Redémarrer WSL pour appliquer le mode miroir.
-wsl --shutdown
 ```
 
-Rouvrez le terminal : `wslinfo --networking-mode` doit répondre `mirrored`, et
-le QR code de `make mobile` doit afficher l'adresse Wi-Fi de l'ordinateur
-(`192.168.x.x`). Le port 8000 de l'API n'a pas besoin d'être ouvert : il passe
-par le relais.
+L'adresse de WSL change à chaque redémarrage : relancez `make mobile` pour
+obtenir la commande à jour. **Rien n'est modifié dans WSL.**
+
+Pour tout annuler :
+
+```powershell
+netsh interface portproxy delete v4tov4 listenport=8081 listenaddress=0.0.0.0
+Remove-NetFirewallRule -DisplayName "KODA Expo (8081)"
+```
+
+> **N'activez pas le mode réseau miroir de WSL** (`networkingMode=mirrored`
+> dans `.wslconfig`) pour ce projet. Il paraît plus élégant, mais il rend WSL
+> inutilisable sur certaines configurations — au point de ne plus pouvoir
+> démarrer la distribution. Le pont ci-dessus obtient le même résultat sans
+> toucher à WSL. Si vous l'aviez activé et que WSL ne démarre plus : supprimez
+> `%UserProfile%\.wslconfig`, puis `wsl --shutdown`.
 
 #### Si le téléphone tourne encore en boucle
 
 | Vérification | Où |
 |---|---|
+| Expo Go a le droit d'accéder au **réseau local** (iOS le demande au premier lancement ; un refus fait tourner en boucle) | iPhone : Réglages → Confidentialité et sécurité → Réseau local → Expo Go |
+| Le Wi-Fi Windows est en **réseau privé** (la règle de pare-feu ne s'applique pas aux réseaux publics) | Paramètres → Réseau et Internet → Wi-Fi → Type de profil réseau |
+| Téléphone et ordinateur sur le **même** Wi-Fi, sans « isolation des clients » (fréquente sur les réseaux invités) | Box / point d'accès |
+| Un seul serveur Expo tourne (un ancien sur le port 8081 bloque le nouveau) | `Ctrl+C` dans l'ancien terminal |
+| Les versions natives correspondent au SDK d'Expo Go | `cd mobile && npx expo-doctor` |
+
+Sans téléphone sous la main, `cd mobile && npx expo start --web` ouvre
+l'application enfant dans le navigateur : l'examen et l'ardoise y sont
+utilisables.
+
+---|---|
 | Le Wi-Fi Windows est en **réseau privé** (la règle 3 ne s'applique pas aux réseaux publics) | Paramètres → Réseau et Internet → Wi-Fi → Type de profil réseau |
 | Expo Go a le droit d'accéder au **réseau local** (iOS le demande au premier lancement ; un refus fait tourner en boucle) | iPhone : Réglages → Confidentialité et sécurité → Réseau local → Expo Go |
 | Téléphone et ordinateur sur le **même** Wi-Fi, sans « isolation des clients » (fréquente sur les réseaux invités) | Box / point d'accès |

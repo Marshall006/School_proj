@@ -40,33 +40,25 @@ install-api: ## Installe uniquement l'API
 api: ## Lance l'API en rechargement automatique (port 8000, accessible sur le reseau)
 	cd $(BACKEND) && ../$(PY) -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
-.PHONY: ip
-ip: ## Diagnostic reseau pour tester sur un telephone
-	@if grep -qi microsoft /proc/version 2>/dev/null; then \
-	  echo "WSL, mode reseau : $$(wslinfo --networking-mode 2>/dev/null || echo inconnu)"; \
-	fi
-	@echo "Adresse annoncee au telephone : $$(hostname -I | awk '{print $$1}')"
-	@echo "Le telephone doit joindre http://<cette adresse>:8081 (l'API passe par ce port)."
-	@case "$$(hostname -I | awk '{print $$1}')" in 172.1[6-9].*|172.2[0-9].*|172.3[01].*) \
-	  echo "Adresse interne a WSL : injoignable depuis le Wi-Fi. Voir README, 'Sous WSL'." ;; esac
-
 .PHONY: web
 web: ## Lance le tableau de bord parent (port 3000)
 	cd web && npm run dev
 
 .PHONY: mobile
-mobile: ## Lance l'application enfant (Expo Go, meme reseau Wi-Fi)
-	@if grep -qi microsoft /proc/version 2>/dev/null && [ "$$(wslinfo --networking-mode 2>/dev/null)" != "mirrored" ]; then \
-	  echo ""; \
-	  echo "  WSL est en mode reseau NAT : un telephone ne peut pas joindre cette machine."; \
-	  echo "  Le QR code pointerait vers $$(hostname -I | awk '{print $$1}'), une adresse interne a WSL."; \
-	  echo ""; \
-	  echo "  Activez le mode miroir (une seule fois) : voir 'Tester sur un telephone' dans README.md"; \
-	  echo "  puis relancez 'make mobile'."; \
-	  echo ""; \
-	  exit 1; \
-	fi
-	cd mobile && npx expo start --lan
+mobile: ## Lance l'application enfant (Expo Go sur un telephone du meme Wi-Fi)
+	@cd mobile && bash ../scripts/mobile.sh
+
+.PHONY: mobile-check
+mobile-check: ## Diagnostic reseau pour le test sur telephone (ne lance rien)
+	@cd mobile && bash ../scripts/mobile.sh --check
+
+.PHONY: up
+up: ## Demarre la pile complete avec Docker
+	docker compose up --build
+
+.PHONY: down
+down: ## Arrete la pile Docker
+	docker compose down
 
 .PHONY: seed
 seed: ## Remplit la banque pedagogique
