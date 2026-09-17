@@ -11,7 +11,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -22,6 +21,7 @@ import type { Assessment, Submission } from "@koda/shared";
 
 import { ApiError, NetworkError, api } from "../api/client";
 import { AnswerInput, type AnswerState } from "../components/AnswerInput";
+import { confirmAsync } from "../lib/confirm";
 import { useApp } from "../state/AppState";
 import { colors, radius, spacing, type } from "../theme";
 
@@ -175,20 +175,18 @@ export function ExamScreen({
     }
   }
 
-  function confirmSubmit() {
+  async function confirmSubmit() {
     const missing = (exam?.items.length ?? 0) - answered;
     if (missing > 0) {
-      Alert.alert(
-        "Envoyer maintenant ?",
-        `Il te reste ${missing} question${missing > 1 ? "s" : ""} sans reponse.`,
-        [
-          { text: "Continuer l'examen", style: "cancel" },
-          { text: "Envoyer quand meme", onPress: () => void submit() },
-        ],
-      );
-      return;
+      const confirmed = await confirmAsync({
+        title: "Envoyer maintenant ?",
+        message: `Il te reste ${missing} question${missing > 1 ? "s" : ""} sans reponse.`,
+        confirmLabel: "Envoyer quand meme",
+        cancelLabel: "Continuer l'examen",
+      });
+      if (!confirmed) return;
     }
-    void submit();
+    await submit();
   }
 
   if (error && !exam) {
@@ -268,7 +266,7 @@ export function ExamScreen({
             <Text style={styles.primaryText}>Suivant</Text>
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity style={styles.primaryButton} onPress={confirmSubmit} disabled={busy}>
+          <TouchableOpacity style={styles.primaryButton} onPress={() => void confirmSubmit()} disabled={busy}>
             <Text style={styles.primaryText}>{busy ? "Envoi…" : "Terminer"}</Text>
           </TouchableOpacity>
         )}

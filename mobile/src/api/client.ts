@@ -36,6 +36,12 @@ export function apiUrl(): string {
   const fromEnv = process.env.EXPO_PUBLIC_API_URL;
   if (fromEnv && fromEnv.length > 0) return fromEnv.replace(/\/+$/, "");
 
+  // Sur le web, l'application est servie par le meme serveur que le relais :
+  // viser la meme origine supprime tout probleme de CORS.
+  if (typeof window !== "undefined" && window.location?.origin) {
+    return `${window.location.origin}/api/v1`;
+  }
+
   const hostUri = Constants.expoConfig?.hostUri;
   if (hostUri) {
     const host = hostUri.split("/")[0];

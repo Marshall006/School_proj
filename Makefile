@@ -48,6 +48,10 @@ web: ## Lance le tableau de bord parent (port 3000)
 mobile: ## Lance l'application enfant (Expo Go sur un telephone du meme Wi-Fi)
 	@cd mobile && bash ../scripts/mobile.sh
 
+.PHONY: mobile-web
+mobile-web: ## Lance l'application enfant dans le navigateur (sans telephone)
+	cd mobile && npx expo start --web
+
 .PHONY: mobile-check
 mobile-check: ## Diagnostic reseau pour le test sur telephone (ne lance rien)
 	@cd mobile && bash ../scripts/mobile.sh --check

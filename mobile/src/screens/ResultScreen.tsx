@@ -45,21 +45,23 @@ export function ResultScreen({
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.content}>
       <View style={[styles.scoreCard, result.passed ? styles.scoreCardPassed : styles.scoreCardFailed]}>
-        <Text style={styles.scoreLabel}>
+        <Text style={[styles.scoreLabel, !result.passed && styles.scoreLabelOnDark]}>
           {result.pending_manual_review
             ? "En attente d'un parent"
             : result.passed
               ? "Reussi"
               : "Pas encore"}
         </Text>
-        <Text style={styles.scoreValue}>
+        <Text style={[styles.scoreValue, !result.passed && styles.scoreValueOnDark]}>
           {result.score_out_of_20.toFixed(1).replace(".", ",")}
           <Text style={styles.scoreMax}> / 20</Text>
         </Text>
-        <Text style={styles.scoreHint}>
+        <Text style={[styles.scoreHint, !result.passed && styles.scoreHintOnDark]}>
           Il fallait {result.pass_score_out_of_20.toFixed(1).replace(".", ",")}/20
         </Text>
-        {result.xp_earned > 0 && <Text style={styles.xp}>+{result.xp_earned} XP</Text>}
+        {result.xp_earned > 0 && (
+          <Text style={[styles.xp, !result.passed && styles.xpOnDark]}>+{result.xp_earned} XP</Text>
+        )}
       </View>
 
       {result.pending_manual_review && (
@@ -171,6 +173,13 @@ const styles = StyleSheet.create({
   scoreMax: { fontSize: 24, fontWeight: "600" },
   scoreHint: { color: colors.successInk, ...type.small, opacity: 0.75 },
   xp: { color: colors.successInk, fontWeight: "800", marginTop: 4 },
+
+  // Sur la carte d'echec, le fond est sombre : l'encre prevue pour le fond
+  // vert deviendrait illisible.
+  scoreLabelOnDark: { color: colors.warning },
+  scoreValueOnDark: { color: colors.ink },
+  scoreHintOnDark: { color: colors.inkMuted, opacity: 1 },
+  xpOnDark: { color: colors.success },
 
   infoCard: { backgroundColor: colors.surface, borderRadius: radius.md, padding: spacing(2), borderWidth: 1, borderColor: colors.warning },
   infoText: { color: colors.inkMuted, ...type.body, lineHeight: 22 },

@@ -124,9 +124,23 @@ Remove-NetFirewallRule -DisplayName "KODA Expo (8081)"
 | Un seul serveur Expo tourne (un ancien sur le port 8081 bloque le nouveau) | `Ctrl+C` dans l'ancien terminal |
 | Les versions natives correspondent au SDK d'Expo Go | `cd mobile && npx expo-doctor` |
 
-Sans téléphone sous la main, `cd mobile && npx expo start --web` ouvre
-l'application enfant dans le navigateur : l'examen et l'ardoise y sont
-utilisables.
+#### Sans téléphone : l'application enfant dans le navigateur
+
+```bash
+make api          # terminal 1
+make mobile-web   # terminal 2 — puis ouvrez http://localhost:8081
+```
+
+Aucun droit administrateur, aucun pare-feu, aucun appareil à appairer
+physiquement. Le parcours complet est utilisable : appairage avec un code
+généré depuis le tableau de bord, écran de verrouillage, examen avec la
+bascule *mode assisté / ardoise*, envoi, note sur 20, temps de carence et
+correction détaillée.
+
+> Le mode web sert à faire tourner et à démontrer l'application. Il ne
+> remplace pas un vrai appareil : dans un navigateur, le secret d'appareil est
+> stocké en clair dans `localStorage`, là où le natif utilise le Keychain ou le
+> Keystore du système.
 
 ---|---|
 | Le Wi-Fi Windows est en **réseau privé** (la règle 3 ne s'applique pas aux réseaux publics) | Paramètres → Réseau et Internet → Wi-Fi → Type de profil réseau |
