@@ -415,7 +415,7 @@ async def extend_session(
     """Rallonge parentale ou conversion d'XP sur une session deja ouverte."""
     at = at or clock_now()
     if not session.is_live:
-        raise ConflictError("Cette session est terminee : il faut un nouveau code.")
+        raise ConflictError("Cette session est terminée : il faut un nouveau code.")
     if minutes <= 0:
         raise ConflictError("La rallonge doit etre positive.")
     session.bonus_ms += minutes * 60_000
@@ -499,5 +499,5 @@ async def minutes_granted_today(
 async def get_session_or_404(db: AsyncSession, session_id: uuid.UUID) -> ScreenSession:
     session = await db.get(ScreenSession, session_id)
     if session is None:
-        raise NotFoundError("Session de temps d'ecran introuvable.")
+        raise NotFoundError("Session de temps d'écran introuvable.")
     return session

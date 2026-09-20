@@ -335,6 +335,6 @@ async def delete_calendar_period(
 ) -> None:
     period = await db.get(CalendarPeriod, period_id)
     if period is None or period.family_id != parent.family_id:
-        raise NotFoundError("Periode introuvable.")
+        raise NotFoundError("Période introuvable.")
     await db.delete(period)
     await db.commit()

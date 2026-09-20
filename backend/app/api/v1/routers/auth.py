@@ -70,7 +70,7 @@ async def register(
         await db.execute(select(Parent).where(Parent.email == payload.email.lower()))
     ).scalar_one_or_none()
     if existing is not None:
-        raise ConflictError("Un compte existe deja avec cette adresse.", code="email_taken")
+        raise ConflictError("Un compte existe déjà avec cette adresse.", code="email_taken")
 
     family = Family(
         name=payload.family_name,

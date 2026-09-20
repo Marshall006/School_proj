@@ -62,6 +62,11 @@ def diminishing_factor(xp_already_today: int) -> float:
     return DIMINISHING_TIERS[-1][1]
 
 
+def plural(count: int) -> str:
+    """Marque du pluriel, pour que les libelles restent lisibles au singulier."""
+    return "s" if count > 1 else ""
+
+
 def apply_diminishing(raw_xp: float, xp_already_today: int) -> int:
     """Applique le rendement decroissant palier par palier."""
     remaining = raw_xp
@@ -105,7 +110,7 @@ def compute_assessment_xp(
             XPGrant(
                 amount=answers_xp,
                 reason=XPReason.CORRECT_ANSWER,
-                label=f"{correct_count} bonne(s) reponse(s)",
+                label=f"{correct_count} bonne{plural(correct_count)} réponse{plural(correct_count)}",
                 meta={
                     "raw": round(raw_answers, 2),
                     "factor": diminishing_factor(xp_already_today),
@@ -117,7 +122,7 @@ def compute_assessment_xp(
     if passed:
         bonus = apply_diminishing(PASS_BONUS, running)
         running += bonus
-        grants.append(XPGrant(bonus, XPReason.ASSESSMENT_PASSED, "Evaluation reussie"))
+        grants.append(XPGrant(bonus, XPReason.ASSESSMENT_PASSED, "Évaluation réussie"))
     if score_pct >= 100.0:
         bonus = apply_diminishing(PERFECT_BONUS, running)
         running += bonus
@@ -129,7 +134,7 @@ def compute_assessment_xp(
             XPGrant(
                 bonus,
                 XPReason.WEAKNESS_CLEARED,
-                f"{cleared_weaknesses} lacune(s) comblee(s)",
+                f"{cleared_weaknesses} lacune{plural(cleared_weaknesses)} comblée{plural(cleared_weaknesses)}",
                 {"count": cleared_weaknesses},
             )
         )
@@ -139,7 +144,7 @@ def compute_assessment_xp(
         running += bonus
         grants.append(
             XPGrant(
-                bonus, XPReason.STREAK_BONUS, f"Serie de {streak_days} jours", {"days": streak_days}
+                bonus, XPReason.STREAK_BONUS, f"Série de {streak_days} jours", {"days": streak_days}
             )
         )
 

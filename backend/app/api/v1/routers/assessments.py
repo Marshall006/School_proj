@@ -161,7 +161,7 @@ async def get_one(
 ) -> AssessmentOut:
     assessment = await svc.get_assessment(db, assessment_id)
     if assessment.child_id != child.id:
-        raise PermissionDeniedError("Cette evaluation ne concerne pas cet enfant.")
+        raise PermissionDeniedError("Cette évaluation ne concerne pas cet enfant.")
     return _serialize(assessment)
 
 
@@ -177,10 +177,10 @@ async def save_answer(
     """Sauvegarde continue : rien n'est perdu si la tablette s'eteint."""
     assessment = await svc.get_assessment(db, assessment_id)
     if assessment.child_id != child.id:
-        raise PermissionDeniedError("Cette evaluation ne concerne pas cet enfant.")
+        raise PermissionDeniedError("Cette évaluation ne concerne pas cet enfant.")
     item = next((i for i in assessment.items if i.id == item_id), None)
     if item is None:
-        raise NotFoundError("Question introuvable dans cette evaluation.")
+        raise NotFoundError("Question introuvable dans cette évaluation.")
 
     await svc.save_answer(
         db,
@@ -206,7 +206,7 @@ async def submit(
     """Corrige l'epreuve et delivre le code, ou ouvre le temps de carence."""
     assessment = await svc.get_assessment(db, assessment_id)
     if assessment.child_id != child.id:
-        raise PermissionDeniedError("Cette evaluation ne concerne pas cet enfant.")
+        raise PermissionDeniedError("Cette évaluation ne concerne pas cet enfant.")
 
     if payload.answers:
         for item_id, answer in payload.answers.items():
@@ -241,9 +241,9 @@ async def review(
     """Correction detaillee : accessible meme (et surtout) en cas d'echec."""
     assessment = await svc.get_assessment(db, assessment_id)
     if assessment.child_id != child.id:
-        raise PermissionDeniedError("Cette evaluation ne concerne pas cet enfant.")
+        raise PermissionDeniedError("Cette évaluation ne concerne pas cet enfant.")
     if assessment.status == AssessmentStatus.IN_PROGRESS:
-        raise ConflictError("L'evaluation n'est pas encore terminee.")
+        raise ConflictError("L'évaluation n'est pas encore terminée.")
     return SubmissionOut(
         assessment_id=assessment.id,
         status=assessment.status.value,

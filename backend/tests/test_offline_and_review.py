@@ -111,7 +111,7 @@ async def test_code_revoque_est_refuse_et_signale_a_lappareil(api, parent, child
 
     refused = await api.post("/unlock/redeem", {"code": code["code"]}, as_device=True)
     assert refused.status_code == 400
-    assert "annule" in refused.json()["error"]["message"]
+    assert "annulé" in refused.json()["error"]["message"]
 
     # La liste de revocation est transmise a l'appareil pour le mode hors ligne.
     sync = await api.post("/device/sync", {"device_wall_ms": None}, as_device=True)

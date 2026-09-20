@@ -163,7 +163,7 @@ def format_code(code: str) -> str:
 
 def minutes_to_units(minutes: int) -> int:
     if minutes <= 0:
-        raise UnlockProtocolError("La duree doit etre strictement positive.")
+        raise UnlockProtocolError("La durée doit être strictement positive.")
     if minutes % DURATION_STEP_MINUTES:
         raise UnlockProtocolError(
             f"La duree doit etre un multiple de {DURATION_STEP_MINUTES} minutes."
@@ -218,7 +218,7 @@ def peek_code(code: str) -> tuple[UnlockKind, int]:
     except ValueError as exc:  # pragma: no cover - defensif
         raise UnlockProtocolError("Nature de code inconnue.") from exc
     if units == 0:
-        raise UnlockProtocolError("Duree nulle.")
+        raise UnlockProtocolError("Durée nulle.")
     return kind, units * DURATION_STEP_MINUTES
 
 
@@ -254,7 +254,7 @@ def verify_code(
                     counter=counter,
                     time_bucket=base_bucket + offset,
                 )
-    raise UnlockProtocolError("Code invalide, deja utilise ou expire.")
+    raise UnlockProtocolError("Code invalide, déjà utilisé ou expiré.")
 
 
 # ---------------------------------------------------------------------------

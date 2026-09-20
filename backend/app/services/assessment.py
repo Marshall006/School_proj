@@ -164,7 +164,7 @@ async def check_eligibility(
         return EligibilityReport(
             False,
             "policy_forbids",
-            {"message": "Le deverrouillage par evaluation est desactive."},
+            {"message": "Le déverrouillage par évaluation est désactivé."},
         )
 
     blocking = await lockouts.active_lockout(db, child.id, at=at)
@@ -464,7 +464,7 @@ async def get_assessment(db: AsyncSession, assessment_id: uuid.UUID) -> Assessme
         )
     ).scalar_one_or_none()
     if assessment is None:
-        raise NotFoundError("Evaluation introuvable.")
+        raise NotFoundError("Évaluation introuvable.")
     return assessment
 
 
@@ -488,7 +488,7 @@ async def save_answer(
     """Enregistre (ou met a jour) la reponse d'un item. Sauvegarde continue."""
     at = at or clock_now()
     if assessment.status != AssessmentStatus.IN_PROGRESS:
-        raise ConflictError("Cette evaluation est deja terminee.")
+        raise ConflictError("Cette évaluation est déjà terminée.")
     if assessment.expires_at and at > assessment.expires_at:
         raise ConflictError("Le temps imparti est ecoule.", code="assessment_expired")
 
@@ -677,7 +677,7 @@ async def submit_assessment(
     """Corrige, decide, recompense ou sanctionne."""
     at = at or clock_now()
     if assessment.status not in (AssessmentStatus.IN_PROGRESS, AssessmentStatus.SUBMITTED):
-        raise ConflictError("Cette evaluation a deja ete corrigee.")
+        raise ConflictError("Cette évaluation a déjà été corrigée.")
 
     assessment.submitted_at = at
     if assessment.started_at:
@@ -743,7 +743,7 @@ async def submit_assessment(
                 duration_minutes=policy.reward_minutes,
                 kind=proto.UnlockKind.ASSESSMENT_REWARD,
                 assessment_id=assessment.id,
-                note=f"Evaluation reussie : {assessment.score_out_of_20}/20",
+                note=f"Évaluation réussie : {assessment.score_out_of_20}/20",
                 at=at,
             )
             assessment.reward_minutes = issued.record.duration_minutes
@@ -918,7 +918,7 @@ async def finalize_after_review(
             duration_minutes=policy.reward_minutes,
             kind=proto.UnlockKind.ASSESSMENT_REWARD,
             assessment_id=assessment.id,
-            note="Evaluation validee apres correction parentale",
+            note="Évaluation validée après correction parentale",
             at=at,
         )
         assessment.reward_minutes = issued.record.duration_minutes
@@ -932,7 +932,7 @@ async def finalize_after_review(
             minutes=lockouts.escalated_minutes(
                 policy.cooldown_minutes, failures, policy.cooldown_escalation
             ),
-            message="Evaluation non validee apres correction.",
+            message="Évaluation non validée après correction.",
             source_assessment_id=assessment.id,
             review_topics=weak,
             at=at,

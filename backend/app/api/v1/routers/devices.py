@@ -147,7 +147,7 @@ async def claim_device(db: DbSession, payload: DeviceClaimRequest) -> DeviceCred
     if request is None:
         raise NotFoundError("Code d'appairage inconnu.", code="pairing_code_unknown")
     if request.consumed_at is not None:
-        raise ConflictError("Ce code d'appairage a deja ete utilise.")
+        raise ConflictError("Ce code d'appairage a déjà été utilisé.")
     if request.expires_at < now:
         raise ConflictError("Ce code d'appairage a expire.", code="pairing_code_expired")
 

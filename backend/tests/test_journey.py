@@ -266,3 +266,51 @@ async def test_saisie_bloquee_apres_des_codes_errones(api, parent, child, device
     reset = await api.post(f"/devices/{devices[0]['id']}/unlock-attempts/reset")
     assert reset.status_code == 200
     assert reset.json()["failed_code_attempts"] == 0
+
+
+async def test_un_second_code_ajoute_du_temps_sans_effacer_le_restant(
+    api, db, parent, child, device
+):
+    """Convertir ses XP (ou recevoir une rallonge) pendant une session ajoute du temps.
+
+    Regression : la consommation ouvrait une session neuve, ce qui faisait
+    perdre le temps deja acquis — l'inverse de ce qu'on promet a l'enfant.
+    """
+    first = (
+        await api.post("/unlock/parent-code", {"child_id": child["id"], "duration_minutes": 60})
+    ).json()
+    opened = (await api.post("/unlock/redeem", {"code": first["code"]}, as_device=True)).json()
+    assert opened["granted_minutes"] == 60
+
+    second = (
+        await api.post("/unlock/parent-code", {"child_id": child["id"], "duration_minutes": 30})
+    ).json()
+    extended = (await api.post("/unlock/redeem", {"code": second["code"]}, as_device=True)).json()
+
+    assert extended["session_id"] == opened["session_id"], "la session doit etre la meme"
+    assert extended["granted_ms"] == 90 * 60_000, "les durees s'additionnent"
+    assert "temps_ajoute_a_la_session_en_cours" in extended["warnings"]
+
+
+async def test_la_carence_indique_la_copie_a_revoir(api, db, parent, child, device):
+    """Pendant le temps de revision, l'enfant doit pouvoir relire sa correction."""
+    from tests.helpers import wrong_answer
+
+    started = await api.post("/assessments", {"kind": "unlock"}, as_device=True)
+    exam = started.json()
+    key = await answer_key(db, exam["id"])
+    answers = {
+        item_id: {"answer": wrong_answer(qtype, spec)} for item_id, (qtype, spec) in key.items()
+    }
+    result = (
+        await api.post(f"/assessments/{exam['id']}/submit", {"answers": answers}, as_device=True)
+    ).json()
+
+    assert result["lockout"]["source_assessment_id"] == exam["id"]
+
+    lockout = (await api.get(f"/children/{child['id']}/lockout")).json()
+    assert lockout["source_assessment_id"] == exam["id"]
+
+    review = await api.get(f"/assessments/{exam['id']}/review", as_device=True)
+    assert review.status_code == 200
+    assert len(review.json()["review"]) == len(exam["items"])

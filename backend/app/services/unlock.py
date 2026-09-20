@@ -174,7 +174,7 @@ async def revoke_code(
 ) -> UnlockCode:
     at = at or clock_now()
     if record.status == UnlockCodeStatus.CONSUMED:
-        raise ConflictError("Ce code a deja ete utilise.")
+        raise ConflictError("Ce code a déjà été utilisé.")
     record.status = UnlockCodeStatus.REVOKED
     record.revoked_at = at
     if family_id:
@@ -246,7 +246,7 @@ async def redeem_code(
     if device.code_locked_until and device.code_locked_until > at:
         remaining = int((device.code_locked_until - at).total_seconds())
         raise DeviceLockedError(
-            "Trop d'essais : la saisie est bloquee temporairement.",
+            "Trop d'essais : la saisie est bloquée temporairement.",
             details={
                 "retry_at": device.code_locked_until.isoformat(),
                 "remaining_seconds": remaining,
@@ -287,10 +287,10 @@ async def redeem_code(
     else:
         if record.status == UnlockCodeStatus.CONSUMED:
             await _register_failed_attempt(db, device, child, at)
-            raise InvalidUnlockCodeError("Ce code a deja ete utilise.")
+            raise InvalidUnlockCodeError("Ce code a déjà été utilisé.")
         if record.status == UnlockCodeStatus.REVOKED:
             await _register_failed_attempt(db, device, child, at)
-            raise InvalidUnlockCodeError("Ce code a ete annule par le parent.")
+            raise InvalidUnlockCodeError("Ce code a été annulé par le parent.")
         if record.expires_at < at and consumed_offline_at is None:
             record.status = UnlockCodeStatus.EXPIRED
             await _register_failed_attempt(db, device, child, at)
@@ -299,8 +299,8 @@ async def redeem_code(
     kind = payload.kind
     if kind == proto.UnlockKind.PARENT_DIRECT and not policy.allow_parent_direct_unlock:
         raise PolicyForbidsError(
-            "Le deverrouillage direct est desactive pour cette periode : "
-            "l'evaluation est le seul chemin.",
+            "Le déverrouillage direct est désactivé pour cette période : "
+            "l'évaluation est le seul chemin.",
             details={"period_type": policy.period_type.value},
         )
 
@@ -329,7 +329,7 @@ async def redeem_code(
     remaining_cap = max(0, policy.daily_cap_minutes - used_today)
     if kind != proto.UnlockKind.EMERGENCY and remaining_cap <= 0:
         raise DailyCapReachedError(
-            "Le temps d'ecran maximum de la journee est atteint.",
+            "Le temps d'écran maximum de la journée est atteint.",
             details={"daily_cap_minutes": policy.daily_cap_minutes, "used_today": used_today},
         )
     if kind != proto.UnlockKind.EMERGENCY and granted > remaining_cap:
@@ -349,20 +349,35 @@ async def redeem_code(
         record.consumed_at = consumed_offline_at or at
         record.consumed_offline = consumed_offline_at is not None
 
-    session = await screen_time.start_session(
-        db,
-        child_id=child.id,
-        device=device,
-        duration_minutes=granted,
-        unlock_code_id=record.id if record else None,
-        at=consumed_offline_at or at,
-        boot_id=boot_id,
-        meta={
-            "kind": kind.name.lower(),
-            "counter": payload.counter,
-            "offline": consumed_offline_at is not None,
-        },
+    # Une session est deja ouverte (l'enfant convertit ses points, ou un parent
+    # accorde une rallonge en cours de partie) : on ajoute le temps au lieu de
+    # repartir de zero. Sans cela, convertir ses XP ferait perdre le temps
+    # restant — exactement l'inverse de la promesse faite a l'enfant.
+    existing = (
+        None
+        if consumed_offline_at is not None
+        else await screen_time.active_session_for_device(db, device.id, at=at)
     )
+    if existing is not None:
+        session = await screen_time.extend_session(
+            db, existing, minutes=granted, at=at, source=kind.name.lower()
+        )
+        warnings.append("temps_ajoute_a_la_session_en_cours")
+    else:
+        session = await screen_time.start_session(
+            db,
+            child_id=child.id,
+            device=device,
+            duration_minutes=granted,
+            unlock_code_id=record.id if record else None,
+            at=consumed_offline_at or at,
+            boot_id=boot_id,
+            meta={
+                "kind": kind.name.lower(),
+                "counter": payload.counter,
+                "offline": consumed_offline_at is not None,
+            },
+        )
 
     if reported_offline_ms > 0:
         await screen_time.reconcile_offline(

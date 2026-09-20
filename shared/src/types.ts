@@ -102,6 +102,8 @@ export interface EffectivePolicy {
 export interface Lockout {
   id: string;
   reason: string;
+  /** Copie a relire pendant la carence, quand elle vient d'une evaluation. */
+  source_assessment_id: string | null;
   until: string;
   remaining_seconds: number;
   remaining_minutes: number;

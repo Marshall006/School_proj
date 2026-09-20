@@ -69,8 +69,8 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="KODA - Controle parental educatif",
     description=(
-        "API du modele *Learn-to-Play* : le temps d'ecran se merite, "
-        "par les devoirs valides par le parent ou par une evaluation reussie."
+        "API du modele *Learn-to-Play* : le temps d'écran se mérite, "
+        "par les devoirs validés par le parent ou par une évaluation réussie."
     ),
     version=VERSION,
     lifespan=lifespan,
@@ -113,7 +113,7 @@ async def observability(request: Request, call_next):
             content={
                 "error": {
                     "code": "rate_limited",
-                    "message": "Trop de requetes : reessaie dans un instant.",
+                    "message": "Trop de requêtes : réessaie dans un instant.",
                     "details": {"limit_per_minute": settings.rate_limit_per_minute},
                 }
             },
@@ -151,7 +151,7 @@ async def validation_handler(request: Request, exc: RequestValidationError) -> J
         content={
             "error": {
                 "code": "validation_error",
-                "message": "Certaines donnees envoyees sont invalides.",
+                "message": "Certaines données envoyées sont invalides.",
                 "details": {"fields": exc.errors()},
             }
         },

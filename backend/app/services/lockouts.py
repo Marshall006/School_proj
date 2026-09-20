@@ -83,6 +83,11 @@ def describe(lockout: Lockout, at: datetime | None = None) -> dict[str, Any]:
     return {
         "id": str(lockout.id),
         "reason": lockout.reason.value,
+        # L'application enfant s'en sert pour rouvrir la correction pendant la
+        # carence : c'est ce qui rend le delai formateur plutot que punitif.
+        "source_assessment_id": (
+            str(lockout.source_assessment_id) if lockout.source_assessment_id else None
+        ),
         "until": lockout.until.isoformat(),
         "remaining_seconds": remaining,
         "remaining_minutes": (remaining + 59) // 60,

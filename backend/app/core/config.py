@@ -24,7 +24,7 @@ class Settings(BaseSettings):
 
     # --- Identite ---------------------------------------------------------
     app_name: str = "KODA"
-    app_tagline: str = "L'ecran se merite."
+    app_tagline: str = "L'écran se mérite."
     environment: Literal["dev", "test", "staging", "prod"] = "dev"
     debug: bool = True
     api_prefix: str = "/api/v1"

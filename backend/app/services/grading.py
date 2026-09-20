@@ -197,25 +197,25 @@ def numbers_match(given: Fraction, expected: Fraction, tolerance: float = 0.0) -
 def diagnose_numeric(given: Fraction | None, expected: Fraction) -> str | None:
     """Traduit un ecart typique en conseil comprehensible par un enfant."""
     if given is None:
-        return "Je n'ai pas reconnu de nombre dans ta reponse."
+        return "Je n'ai pas reconnu de nombre dans ta réponse."
     if given == expected:
         return None
     if given == -expected:
-        return "Le resultat est bon mais le signe est inverse : attention au moins."
+        return "Le résultat est bon mais le signe est inversé : attention au moins."
     if expected != 0:
         ratio = float(given) / float(expected)
         for power, label in ((10, "10"), (100, "100"), (1000, "1000")):
             if math.isclose(ratio, power, rel_tol=1e-6):
-                return f"Ta reponse est {label} fois trop grande : verifie la virgule ou les zeros."
+                return f"Ta réponse est {label} fois trop grande : vérifie la virgule ou les zéros."
             if math.isclose(ratio, 1 / power, rel_tol=1e-6):
-                return f"Ta reponse est {label} fois trop petite : verifie la virgule ou les zeros."
+                return f"Ta réponse est {label} fois trop petite : vérifie la virgule ou les zéros."
     if given != 0 and expected != 0 and given == 1 / expected:
-        return "Tu as inverse la fraction (numerateur et denominateur echanges)."
+        return "Tu as inversé la fraction (numérateur et dénominateur échangés)."
     diff = abs(float(given) - float(expected))
     if math.isclose(diff, 1.0, rel_tol=1e-9):
-        return "Il ne manque (ou il ne reste) qu'une unite : verifie ta retenue."
+        return "Il ne manque (ou il ne reste) qu'une unité : vérifie ta retenue."
     if expected != 0 and abs(diff / float(expected)) < 0.05:
-        return "Tu es tres proche : c'est sans doute une erreur de calcul en fin d'operation."
+        return "Tu es très proche : c'est sans doute une erreur de calcul en fin d'opération."
     return None
 
 
@@ -227,7 +227,7 @@ def diagnose_text(given: str, expected: str, options: dict[str, Any] | None = No
     conclure a tort que la reponse est juste.
     """
     if not given.strip():
-        return "Tu n'as rien ecrit."
+        return "Tu n'as rien écrit."
     options = options or {}
     g = normalize_text(given, **options)
     e = normalize_text(expected, **options)
@@ -238,9 +238,9 @@ def diagnose_text(given: str, expected: str, options: dict[str, Any] | None = No
     g, e = strip_accents(g), strip_accents(e)
     distance = levenshtein(g, e)
     if distance == 1:
-        return "Il n'y a qu'une lettre de difference : relis l'orthographe."
+        return "Il n'y a qu'une lettre de différence : relis l'orthographe."
     if distance <= 2 and abs(len(g) - len(e)) <= 2:
-        return "Le mot est presque juste : verifie l'orthographe."
+        return "Le mot est presque juste : vérifie l'orthographe."
     if sorted(g.split()) == sorted(e.split()):
         return "Tous les mots y sont, mais l'ordre n'est pas le bon."
     return None
@@ -335,7 +335,7 @@ def _grade_true_false(spec: dict[str, Any], answer: dict[str, Any] | None) -> Gr
         is_correct=ok,
         expected=expected,
         given=given,
-        detail=None if ok else "La proposition inverse etait attendue.",
+        detail=None if ok else "La proposition inverse était attendue.",
     )
 
 
@@ -373,7 +373,7 @@ def _grade_numeric(spec: dict[str, Any], answer: dict[str, Any] | None) -> Grade
         and unit_expected.lower() not in raw_given.lower()
     ):
         ok = False
-        unit_note = f"Le resultat est bon mais l'unite ({unit_expected}) manque."
+        unit_note = f"Le résultat est bon mais l'unité ({unit_expected}) manque."
 
     return GradeResult(
         score=1.0 if ok else 0.0,
@@ -566,7 +566,7 @@ def _grade_handwritten(spec: dict[str, Any], answer: dict[str, Any] | None) -> G
             expected=spec.get("display") or spec.get("value"),
             given=None,
             detail=(
-                "Reponse manuscrite a valider par un parent." if has_strokes else "Aucune reponse."
+                "Réponse manuscrite à valider par un parent." if has_strokes else "Aucune réponse."
             ),
         )
     sub = (
@@ -613,7 +613,7 @@ def grade_answer(
             is_correct=False,
             expected=spec.get("display") or spec.get("value") or spec.get("correct"),
             given=None,
-            detail="Aucune reponse donnee.",
+            detail="Aucune réponse donnée.",
         )
 
     grader = _GRADERS.get(qtype)
@@ -623,7 +623,7 @@ def grade_answer(
             is_correct=False,
             needs_manual_review=True,
             given=given_answer,
-            detail="Ce type de reponse demande une validation humaine.",
+            detail="Ce type de réponse demande une validation humaine.",
         )
     return grader(spec, given_answer)
 

@@ -321,7 +321,7 @@ async def integrity_alerts(
                 "severity": "info",
                 "type": "offline_usage",
                 "message": (
-                    f"{len(offline)} code(s) utilise(s) hors ligne : le temps a ete "
+                    f"{len(offline)} code(s) utilisé(s) hors ligne : le temps a été "
                     "reconcilie a la reconnexion."
                 ),
                 "at": at.isoformat(),
@@ -394,6 +394,9 @@ async def family_overview(
     """Vue d'ensemble du foyer, tous enfants confondus."""
     at = at or clock_now()
     children = list((await db.execute(select(Child).where(Child.family_id == family_id))).scalars())
+    # Une session dont le butoir est depasse n'est plus vivante, meme si aucun
+    # battement n'est venu la fermer : sans cette condition, le foyer affiche
+    # « 1 session en cours » alors que toutes les tablettes sont verrouillees.
     active_sessions = int(
         await db.scalar(
             select(func.count(ScreenSession.id))
@@ -401,6 +404,7 @@ async def family_overview(
             .where(
                 Child.family_id == family_id,
                 ScreenSession.state == ScreenSessionState.ACTIVE,
+                ScreenSession.wall_deadline_at > at,
             )
         )
         or 0

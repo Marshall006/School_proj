@@ -38,7 +38,7 @@ from app.schemas.access import (
 from app.services import audit, screen_time, unlock, xp
 from app.services.policy import resolve_policy
 
-router = APIRouter(tags=["Deverrouillage et temps d'ecran"])
+router = APIRouter(tags=["Déverrouillage et temps d'écran"])
 
 
 async def _pick_device(db, child_id: uuid.UUID, device_id: uuid.UUID | None) -> Device:
@@ -87,7 +87,7 @@ async def issue_parent_code(
 
     if not policy.allow_parent_direct_unlock:
         raise PolicyForbidsError(
-            "Le deverrouillage direct est desactive pour la periode en cours "
+            "Le déverrouillage direct est désactivé pour la période en cours "
             f"({policy.period_type.value}). Modifie les regles pour l'autoriser.",
             details={"period_type": policy.period_type.value},
         )
@@ -272,7 +272,7 @@ async def redeem_xp(
             xp.XPGrant(
                 amount=-quote.xp_spent,
                 reason=XPReason.REDEEM,
-                label=f"Conversion en {quote.minutes} minutes d'ecran",
+                label=f"Conversion en {quote.minutes} minutes d'écran",
                 meta={"minutes": quote.minutes},
             )
         ],

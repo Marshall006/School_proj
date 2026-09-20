@@ -30,7 +30,7 @@ DbSession = Annotated[AsyncSession, Depends(get_session)]
 
 def _bearer(authorization: str | None) -> str:
     if not authorization or not authorization.lower().startswith("bearer "):
-        raise AuthenticationError("Jeton d'acces manquant.")
+        raise AuthenticationError("Jeton d'accès manquant.")
     return authorization.split(" ", 1)[1].strip()
 
 
@@ -92,7 +92,7 @@ async def current_device(
         raise AuthenticationError("Appareil introuvable.")
     if device.status != DeviceStatus.ACTIVE:
         raise PermissionDeniedError(
-            "Cet appareil a ete revoque par le parent.", code="device_revoked"
+            "Cet appareil a été révoqué par le parent.", code="device_revoked"
         )
     device.last_seen_at = clock_now()
     request.state.device_id = str(device.id)

@@ -113,7 +113,7 @@ def test_numerique_unite_exigee():
     assert grade_answer(Q.NUMERIC, spec, {"value": "12 cm"}).is_correct
     result = grade_answer(Q.NUMERIC, spec, {"value": "12"})
     assert not result.is_correct
-    assert "unite" in (result.detail or "")
+    assert "unité" in (result.detail or "")
 
 
 @pytest.mark.parametrize(
@@ -214,7 +214,7 @@ def test_absence_de_reponse():
     result = grade_answer(Q.NUMERIC, {"value": 1}, None)
     assert result.score == 0.0
     assert not result.needs_manual_review
-    assert "Aucune reponse" in (result.detail or "")
+    assert "Aucune réponse" in (result.detail or "")
 
 
 def test_type_vocal_demande_une_validation_humaine():
