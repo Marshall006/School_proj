@@ -2,12 +2,12 @@
  * Pave de saisie assiste.
  *
  * Sur tablette, taper une virgule ou un symbole mathematique au clavier
- * systeme est penible et casse la concentration. Le pave affiche exactement les
- * touches utiles a la question en cours, telles que le serveur les a decrites
- * dans `input_spec`.
+ * système est penible et casse la concentration. Le pave n'affiche que les
+ * touches utiles à la question en cours, telles que le serveur les decrit dans
+ * `input_spec`.
  */
 
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { colors, radius, spacing, type } from "../theme";
 
@@ -55,36 +55,38 @@ export function Keypad({
   const rows = LAYOUTS[mode] ?? LAYOUTS.numeric;
   const extras = (palette ?? []).filter((key) => !rows.flat().includes(key));
 
+  const renderKey = (key: string, soft = false) => (
+    <Pressable
+      key={key}
+      onPress={() => onKey(key)}
+      accessibilityRole="button"
+      accessibilityLabel={key === "⌫" ? "Effacer" : key}
+      style={({ pressed }) => [
+        styles.key,
+        soft && styles.keySoft,
+        key === "⌫" && styles.keyErase,
+        pressed && styles.keyPressed,
+      ]}
+    >
+      <Text style={[styles.keyText, key === "⌫" && styles.keyEraseText]}>{key}</Text>
+    </Pressable>
+  );
+
   return (
     <View style={styles.pad}>
       {rows.map((row, rowIndex) => (
         <View key={rowIndex} style={styles.row}>
-          {row.map((key) => (
-            <TouchableOpacity
-              key={key}
-              style={[styles.key, key === "⌫" && styles.keyMuted]}
-              onPress={() => onKey(key)}
-              accessibilityLabel={key === "⌫" ? "Effacer" : key}
-            >
-              <Text style={styles.keyText}>{key}</Text>
-            </TouchableOpacity>
-          ))}
+          {row.map((key) => renderKey(key))}
         </View>
       ))}
-      {extras.length > 0 && (
-        <View style={styles.row}>
-          {extras.map((key) => (
-            <TouchableOpacity key={key} style={[styles.key, styles.keySoft]} onPress={() => onKey(key)}>
-              <Text style={styles.keyText}>{key}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
-      {onClear && (
-        <TouchableOpacity style={styles.clear} onPress={onClear}>
+      {extras.length > 0 ? (
+        <View style={styles.row}>{extras.map((key) => renderKey(key, true))}</View>
+      ) : null}
+      {onClear ? (
+        <Pressable onPress={onClear} style={styles.clear}>
           <Text style={styles.clearText}>Tout effacer</Text>
-        </TouchableOpacity>
-      )}
+        </Pressable>
+      ) : null}
     </View>
   );
 }
@@ -94,17 +96,19 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", gap: spacing(1) },
   key: {
     flex: 1,
-    minHeight: 54,
+    minHeight: 58,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.surfaceHigh,
-    borderRadius: radius.sm,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.line,
   },
-  keyMuted: { backgroundColor: colors.surface },
-  keySoft: { backgroundColor: colors.bgSoft },
-  keyText: { color: colors.ink, fontSize: 22, fontWeight: "600" },
-  clear: { alignSelf: "flex-start", paddingVertical: 6, paddingHorizontal: 12 },
-  clearText: { color: colors.inkMuted, ...type.small },
+  keySoft: { backgroundColor: colors.primarySoft, borderColor: colors.primarySoft },
+  keyErase: { backgroundColor: colors.surfaceAlt },
+  keyPressed: { backgroundColor: colors.primarySoft, borderColor: colors.primary },
+  keyText: { color: colors.ink, fontSize: 23, fontWeight: "700" },
+  keyEraseText: { color: colors.inkSoft },
+  clear: { alignSelf: "flex-start", paddingVertical: 8, paddingHorizontal: 12 },
+  clearText: { color: colors.inkFaint, ...type.small, fontWeight: "700" },
 });

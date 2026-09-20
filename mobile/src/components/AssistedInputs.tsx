@@ -4,10 +4,10 @@
  * Chaque gabarit reproduit la disposition apprise en classe :
  *
  * - `FractionBuilder` : la barre de fraction, avec numerateur et denominateur
- *   dans deux cases distinctes (on ne tape pas « 3/4 » a la main) ;
+ *   dans deux cases distinctes (on ne tape pas « 3/4 » à la main) ;
  * - `LongDivision` : la potence de la division posee, avec la barre verticale
  *   et la barre horizontale que l'enfant connait ;
- * - `ColumnOperation` : l'operation posee en colonnes, chiffres alignes ;
+ * - `ColumnOperation` : l'opération posee en colonnes, chiffres alignes ;
  * - `ChoiceList`, `OrderingList`, `MatchingBoard` : QCM, remise en ordre et
  *   associations, manipules au doigt.
  */
@@ -56,7 +56,7 @@ export function FractionBuilder({
           accessibilityLabel="Denominateur"
         />
       </View>
-      <Text style={styles.caption}>Ecris le numerateur en haut, le denominateur en bas.</Text>
+      <Text style={styles.caption}>Écris le numerateur en haut, le denominateur en bas.</Text>
     </View>
   );
 }
@@ -121,7 +121,7 @@ export function LongDivision({
 }
 
 // ---------------------------------------------------------------------------
-// Operation posee en colonnes
+// Opération posee en colonnes
 // ---------------------------------------------------------------------------
 
 export function ColumnOperation({
@@ -153,7 +153,7 @@ export function ColumnOperation({
         keyboardType="numbers-and-punctuation"
         placeholder="résultat"
         placeholderTextColor={colors.inkFaint}
-        accessibilityLabel="Resultat de l'operation"
+        accessibilityLabel="Résultat de l'opération"
       />
     </View>
   );
@@ -198,7 +198,7 @@ export function ChoiceList({
           </TouchableOpacity>
         );
       })}
-      {multiple && <Text style={styles.caption}>Plusieurs reponses sont possibles.</Text>}
+      {multiple && <Text style={styles.caption}>Plusieurs réponses sont possibles.</Text>}
     </View>
   );
 }
@@ -292,7 +292,7 @@ export function MatchingBoard({
       ))}
 
       <Text style={styles.caption}>
-        {active ? `Choisis la reponse pour « ${active} »` : "Touche un element de gauche, puis sa reponse."}
+        {active ? `Choisis la réponse pour « ${active} »` : "Touche un élément de gauche, puis sa réponse."}
       </Text>
       <View style={styles.matchOptions}>
         {right.map((option) => (
@@ -339,9 +339,9 @@ const styles = StyleSheet.create({
   columnWrap: { alignItems: "flex-end", alignSelf: "center", gap: 2 },
   columnNumber: { color: colors.ink, fontSize: 28, fontWeight: "700", textAlign: "right", letterSpacing: 3 },
   columnLine: { flexDirection: "row", alignItems: "center", gap: spacing(1) },
-  columnOperator: { color: colors.accent, fontSize: 24, fontWeight: "700" },
+  columnOperator: { color: colors.primary, fontSize: 24, fontWeight: "700" },
   columnRule: { height: 3, width: 160, backgroundColor: colors.ink, marginVertical: 6, borderRadius: 2 },
-  columnInput: { color: colors.accent, fontSize: 28, fontWeight: "700", textAlign: "right", letterSpacing: 3 },
+  columnInput: { color: colors.primary, fontSize: 28, fontWeight: "700", textAlign: "right", letterSpacing: 3 },
 
   choice: {
     flexDirection: "row",
@@ -351,9 +351,9 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     backgroundColor: colors.surface,
     borderWidth: 2,
-    borderColor: colors.border,
+    borderColor: colors.line,
   },
-  choiceActive: { borderColor: colors.accent, backgroundColor: colors.surfaceHigh },
+  choiceActive: { borderColor: colors.primary, backgroundColor: colors.surfaceAlt },
   choiceMark: {
     width: 26,
     height: 26,
@@ -364,8 +364,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   choiceMarkSquare: { borderRadius: 7 },
-  choiceMarkActive: { borderColor: colors.accent, backgroundColor: colors.accent },
-  choiceMarkText: { color: colors.accentInk, fontWeight: "800", fontSize: 15 },
+  choiceMarkActive: { borderColor: colors.primary, backgroundColor: colors.primary },
+  choiceMarkText: { color: colors.onPrimary, fontWeight: "800", fontSize: 15 },
   choiceText: { color: colors.ink, fontSize: 17, flex: 1 },
   choiceTextActive: { color: colors.ink, fontSize: 17, fontWeight: "600", flex: 1 },
 
@@ -377,20 +377,20 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.line,
   },
   orderIndex: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: colors.accent,
-    color: colors.accentInk,
+    backgroundColor: colors.primary,
+    color: colors.onPrimary,
     textAlign: "center",
     lineHeight: 28,
     fontWeight: "800",
   },
   orderText: { color: colors.ink, fontSize: 16, flex: 1 },
-  orderButton: { padding: 8, borderRadius: radius.sm, backgroundColor: colors.surfaceHigh },
+  orderButton: { padding: 8, borderRadius: radius.sm, backgroundColor: colors.surfaceAlt },
   orderButtonText: { color: colors.ink, fontSize: 13 },
 
   matchRow: { flexDirection: "row", alignItems: "center", gap: spacing(1) },
@@ -400,9 +400,9 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     backgroundColor: colors.surface,
     borderWidth: 2,
-    borderColor: colors.border,
+    borderColor: colors.line,
   },
-  matchLeftActive: { borderColor: colors.accent },
+  matchLeftActive: { borderColor: colors.primary },
   matchArrow: { color: colors.inkFaint, fontSize: 18 },
   matchTarget: {
     flex: 1,
@@ -410,17 +410,17 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     borderWidth: 2,
     borderStyle: "dashed",
-    borderColor: colors.border,
+    borderColor: colors.line,
   },
-  matchTargetFilled: { borderStyle: "solid", borderColor: colors.accent, backgroundColor: colors.surfaceHigh },
+  matchTargetFilled: { borderStyle: "solid", borderColor: colors.primary, backgroundColor: colors.surfaceAlt },
   matchOptions: { flexDirection: "row", flexWrap: "wrap", gap: spacing(1) },
   matchOption: {
     paddingVertical: spacing(1),
     paddingHorizontal: spacing(1.5),
     borderRadius: radius.pill,
-    backgroundColor: colors.surfaceHigh,
+    backgroundColor: colors.surfaceAlt,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.line,
   },
   matchOptionDisabled: { opacity: 0.45 },
 });

@@ -1,39 +1,32 @@
 /**
  * L'examen.
  *
- * L'ecran reproduit les conditions d'un devoir : une question a la fois, un
- * chronometre visible, pas de retour au reste de la tablette. Les reponses sont
- * sauvegardees au fil de l'eau (une coupure ne fait rien perdre) et l'envoi
- * final regroupe tout, ce qui permet de composer entierement hors ligne si
- * l'epreuve a ete telechargee.
+ * Conditions d'un devoir : une question à la fois, un chronometre visible, pas
+ * de sortie accidentelle. Les réponses sont sauvegardees au fil de l'eau — une
+ * coupure ne fait rien perdre — et l'envoi final regroupe tout, ce qui permet
+ * de composer entierement hors ligne.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import type { Assessment, Submission } from "@koda/shared";
 
 import { ApiError, NetworkError, api } from "../api/client";
 import { AnswerInput, type AnswerState } from "../components/AnswerInput";
+import { Banner, Chip, GhostButton, PrimaryButton } from "../components/kit";
 import { confirmAsync } from "../lib/confirm";
 import { useApp } from "../state/AppState";
-import { colors, radius, spacing, type } from "../theme";
+import { colors, elevation, radius, spacing, type } from "../theme";
 
 const BUCKET_LABEL: Record<string, string> = {
-  remediation: "Notion a consolider",
+  remediation: "A consolider",
   apprentissage: "Programme en cours",
-  consolidation: "Tu maitrises deja",
+  consolidation: "Tu maîtrises déjà",
 };
-const BUCKET_COLOR: Record<string, string> = {
-  remediation: colors.bucketRemediation,
-  apprentissage: colors.bucketApprentissage,
-  consolidation: colors.bucketConsolidation,
+const BUCKET_TONE: Record<string, "gold" | "primary" | "success"> = {
+  remediation: "gold",
+  apprentissage: "primary",
+  consolidation: "success",
 };
 
 export function ExamScreen({
@@ -56,14 +49,16 @@ export function ExamScreen({
   const questionStart = useRef(Date.now());
   const backgroundCount = useRef(0);
 
-  // --- Chargement de l'epreuve --------------------------------------------
   useEffect(() => {
     if (!identity) return;
     void (async () => {
       setBusy(true);
       try {
         const current = await api.currentAssessment(identity.deviceToken).catch(() => null);
-        const assessment = current ?? (await api.startAssessment(identity.deviceToken, kind));
+        const assessment =
+          current && current.kind === kind
+            ? current
+            : await api.startAssessment(identity.deviceToken, kind);
         setExam(assessment);
         setAnswers(
           Object.fromEntries(
@@ -82,7 +77,7 @@ export function ExamScreen({
           err instanceof ApiError
             ? err.message
             : err instanceof NetworkError
-              ? "Impossible de charger l'evaluation sans connexion."
+              ? "Impossible de charger l'évaluation sans connexion."
               : "Erreur inattendue.",
         );
       } finally {
@@ -91,7 +86,6 @@ export function ExamScreen({
     })();
   }, [identity, kind]);
 
-  // --- Chronometre ---------------------------------------------------------
   useEffect(() => {
     if (!exam?.time_limit_seconds) return;
     const tick = () => {
@@ -108,24 +102,29 @@ export function ExamScreen({
 
   const item = exam?.items[index];
 
+  const isAnswered = useCallback(
+    (state: AnswerState | undefined) =>
+      Boolean(state?.answer && Object.keys(state.answer).length > 0) ||
+      Boolean(state?.strokes?.paths.length),
+    [],
+  );
   const answered = useMemo(
-    () => Object.values(answers).filter((state) => state.answer && Object.keys(state.answer).length > 0).length,
-    [answers],
+    () => Object.values(answers).filter(isAnswered).length,
+    [answers, isAnswered],
   );
 
   const saveCurrent = useCallback(
     async (itemId: string, state: AnswerState) => {
       if (!identity || !exam) return;
-      const payload = {
-        answer: state.answer,
-        answer_mode: state.mode,
-        strokes: state.strokes ? (state.strokes as unknown as Record<string, unknown>) : null,
-        time_spent_ms: Date.now() - questionStart.current,
-      };
       try {
-        await api.saveAnswer(identity.deviceToken, exam.id, itemId, payload);
+        await api.saveAnswer(identity.deviceToken, exam.id, itemId, {
+          answer: state.answer,
+          answer_mode: state.mode,
+          strokes: state.strokes ? (state.strokes as unknown as Record<string, unknown>) : null,
+          time_spent_ms: Date.now() - questionStart.current,
+        });
       } catch {
-        // Hors ligne : la reponse part avec l'envoi final.
+        // Hors ligne : la réponse partira avec l'envoi final.
       }
     },
     [identity, exam],
@@ -143,15 +142,11 @@ export function ExamScreen({
     setBusy(true);
     setError(null);
     try {
-      const payload = {
+      const result = await api.submit(identity.deviceToken, exam.id, {
         answers: Object.fromEntries(
           Object.entries(answers).map(([id, state]) => [
             id,
-            {
-              answer: state.answer,
-              answer_mode: state.mode,
-              strokes: state.strokes ?? null,
-            },
+            { answer: state.answer, answer_mode: state.mode, strokes: state.strokes ?? null },
           ]),
         ),
         integrity: {
@@ -159,13 +154,12 @@ export function ExamScreen({
           background_events: backgroundCount.current,
           auto_submitted: auto,
         },
-      };
-      const result = await api.submit(identity.deviceToken, exam.id, payload);
+      });
       onFinished(result);
     } catch (err) {
       setError(
         err instanceof NetworkError
-          ? "Envoi impossible : reconnecte-toi puis reessaie. Tes reponses sont gardees."
+          ? "Envoi impossible : reconnecte-toi puis réessaie. Tes réponses sont gardées."
           : err instanceof ApiError
             ? err.message
             : "Envoi impossible.",
@@ -178,24 +172,34 @@ export function ExamScreen({
   async function confirmSubmit() {
     const missing = (exam?.items.length ?? 0) - answered;
     if (missing > 0) {
-      const confirmed = await confirmAsync({
+      const ok = await confirmAsync({
         title: "Envoyer maintenant ?",
-        message: `Il te reste ${missing} question${missing > 1 ? "s" : ""} sans reponse.`,
-        confirmLabel: "Envoyer quand meme",
+        message: `Il te reste ${missing} question${missing > 1 ? "s" : ""} sans réponse.`,
+        confirmLabel: "Envoyer quand même",
         cancelLabel: "Continuer l'examen",
       });
-      if (!confirmed) return;
+      if (!ok) return;
     }
     await submit();
+  }
+
+  async function quit() {
+    const ok = await confirmAsync({
+      title: "Quitter l'évaluation ?",
+      message: "Tes réponses sont gardées, tu pourras reprendre ou tu en etais.",
+      confirmLabel: "Quitter",
+      cancelLabel: "Continuer",
+    });
+    if (ok) onCancel();
   }
 
   if (error && !exam) {
     return (
       <View style={styles.center}>
-        <Text style={styles.error}>{error}</Text>
-        <TouchableOpacity style={styles.secondaryButton} onPress={onCancel}>
-          <Text style={styles.secondaryText}>Retour</Text>
-        </TouchableOpacity>
+        <Banner tone="danger" title="Évaluation indisponible">
+          {error}
+        </Banner>
+        <GhostButton label="Retour" onPress={onCancel} />
       </View>
     );
   }
@@ -203,44 +207,62 @@ export function ExamScreen({
   if (!exam || !item) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator color={colors.accent} size="large" />
-        <Text style={styles.loading}>Preparation de ton evaluation…</Text>
+        <ActivityIndicator color={colors.primary} size="large" />
+        <Text style={styles.loading}>Je prépare tes questions…</Text>
       </View>
     );
   }
 
   const bucket = (item as unknown as { bucket?: string }).bucket;
-  const progress = (index + 1) / exam.items.length;
+  const urgent = remaining !== null && remaining < 60;
 
   return (
     <View style={styles.root}>
+      {/* --- Barre haute ---------------------------------------------------- */}
       <View style={styles.topBar}>
-        <TouchableOpacity onPress={onCancel} accessibilityLabel="Quitter">
-          <Text style={styles.quit}>Quitter</Text>
-        </TouchableOpacity>
-        <Text style={styles.counter}>
-          Question {index + 1} / {exam.items.length}
-        </Text>
-        {remaining !== null && (
-          <Text style={[styles.timer, remaining < 60 && styles.timerUrgent]}>
-            {Math.floor(remaining / 60)}:{String(remaining % 60).padStart(2, "0")}
+        <Pressable onPress={() => void quit()} accessibilityLabel="Quitter" style={styles.quitButton}>
+          <Text style={styles.quit}>✕</Text>
+        </Pressable>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.counter}>
+            Question {index + 1} sur {exam.items.length}
           </Text>
-        )}
-      </View>
-      <View style={styles.progressTrack}>
-        <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
-      </View>
-
-      <ScrollView contentContainerStyle={styles.content}>
-        {bucket && (
-          <View style={[styles.bucket, { borderColor: BUCKET_COLOR[bucket] ?? colors.border }]}>
-            <Text style={[styles.bucketText, { color: BUCKET_COLOR[bucket] ?? colors.inkMuted }]}>
-              {BUCKET_LABEL[bucket] ?? bucket}
-            </Text>
+          <View style={styles.dots}>
+            {exam.items.map((candidate, position) => (
+              <Pressable
+                key={candidate.id}
+                onPress={() => goTo(position)}
+                accessibilityLabel={`Aller à la question ${position + 1}`}
+                style={[
+                  styles.dot,
+                  isAnswered(answers[candidate.id]) && styles.dotAnswered,
+                  position === index && styles.dotCurrent,
+                ]}
+              />
+            ))}
           </View>
-        )}
+        </View>
+        {remaining !== null ? (
+          <Chip
+            label={`${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, "0")}`}
+            tone={urgent ? "danger" : "neutral"}
+            icon="⏱"
+          />
+        ) : null}
+      </View>
 
-        {item.instructions && <Text style={styles.instructions}>{item.instructions}</Text>}
+      {/* --- La question ----------------------------------------------------- */}
+      <ScrollView contentContainerStyle={styles.content}>
+        {bucket ? (
+          <Chip label={BUCKET_LABEL[bucket] ?? bucket} tone={BUCKET_TONE[bucket] ?? "primary"} />
+        ) : null}
+
+        {item.instructions ? (
+          <View style={styles.instructions}>
+            <Text style={styles.instructionsText}>{item.instructions}</Text>
+          </View>
+        ) : null}
+
         <Text style={styles.prompt}>{item.prompt}</Text>
 
         <AnswerInput
@@ -249,27 +271,27 @@ export function ExamScreen({
           onChange={(state) => setAnswers((current) => ({ ...current, [item.id]: state }))}
         />
 
-        {error && <Text style={styles.error}>{error}</Text>}
+        {error ? <Banner tone="danger">{error}</Banner> : null}
       </ScrollView>
 
+      {/* --- Barre basse ----------------------------------------------------- */}
       <View style={styles.bottomBar}>
-        <TouchableOpacity
-          style={[styles.navButton, index === 0 && styles.navDisabled]}
-          onPress={() => goTo(index - 1)}
-          disabled={index === 0}
-        >
-          <Text style={styles.navText}>Precedent</Text>
-        </TouchableOpacity>
-
-        {index < exam.items.length - 1 ? (
-          <TouchableOpacity style={styles.primaryButton} onPress={() => goTo(index + 1)}>
-            <Text style={styles.primaryText}>Suivant</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity style={styles.primaryButton} onPress={() => void confirmSubmit()} disabled={busy}>
-            <Text style={styles.primaryText}>{busy ? "Envoi…" : "Terminer"}</Text>
-          </TouchableOpacity>
-        )}
+        <View style={{ flex: 1 }}>
+          <GhostButton label="Précédent" onPress={() => goTo(index - 1)} disabled={index === 0} />
+        </View>
+        <View style={{ flex: 1.4 }}>
+          {index < exam.items.length - 1 ? (
+            <PrimaryButton label="Suivant" onPress={() => goTo(index + 1)} />
+          ) : (
+            <PrimaryButton
+              label="Terminer"
+              icon="✓"
+              tone="success"
+              busy={busy}
+              onPress={() => void confirmSubmit()}
+            />
+          )}
+        </View>
       </View>
     </View>
   );
@@ -277,45 +299,61 @@ export function ExamScreen({
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
-  center: { flex: 1, backgroundColor: colors.bg, alignItems: "center", justifyContent: "center", gap: spacing(2), padding: spacing(3) },
-  loading: { color: colors.inkMuted, ...type.body },
+  center: {
+    flex: 1,
+    backgroundColor: colors.bg,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing(2),
+    padding: spacing(3),
+  },
+  loading: { color: colors.inkSoft, ...type.body },
 
   topBar: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    gap: spacing(1.5),
     paddingHorizontal: spacing(2.5),
     paddingTop: spacing(6),
-    paddingBottom: spacing(1),
+    paddingBottom: spacing(1.5),
+    backgroundColor: colors.surface,
+    borderBottomLeftRadius: radius.lg,
+    borderBottomRightRadius: radius.lg,
+    ...elevation.card,
   },
-  quit: { color: colors.inkFaint, ...type.small },
-  counter: { color: colors.ink, ...type.small, fontWeight: "700" },
-  timer: { color: colors.inkMuted, ...type.small, fontVariant: ["tabular-nums"] },
-  timerUrgent: { color: colors.danger, fontWeight: "800" },
+  quitButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.surfaceAlt,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  quit: { color: colors.inkSoft, fontSize: 17, fontWeight: "800" },
+  counter: { color: colors.ink, ...type.small, fontWeight: "800" },
+  dots: { flexDirection: "row", gap: 4, marginTop: 6, flexWrap: "wrap" },
+  dot: { width: 16, height: 6, borderRadius: 3, backgroundColor: colors.line },
+  dotAnswered: { backgroundColor: colors.success },
+  dotCurrent: { backgroundColor: colors.primary, width: 24 },
 
-  progressTrack: { height: 4, backgroundColor: colors.surface, marginHorizontal: spacing(2.5), borderRadius: 2 },
-  progressFill: { height: 4, backgroundColor: colors.accent, borderRadius: 2 },
-
-  content: { padding: spacing(2.5), gap: spacing(2.5), paddingBottom: spacing(6) },
-  bucket: { alignSelf: "flex-start", borderWidth: 1, borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 4 },
-  bucketText: { ...type.small, fontWeight: "700" },
-  instructions: { color: colors.inkMuted, ...type.body, lineHeight: 24 },
-  prompt: { color: colors.ink, fontSize: 23, fontWeight: "700", lineHeight: 32 },
-  error: { color: colors.danger, ...type.small },
+  content: { padding: spacing(2.5), gap: spacing(2.5), paddingBottom: spacing(5) },
+  instructions: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    padding: spacing(2),
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primary,
+  },
+  instructionsText: { color: colors.inkSoft, ...type.body, lineHeight: 24 },
+  prompt: { color: colors.ink, fontSize: 24, fontWeight: "800", lineHeight: 33, letterSpacing: -0.3 },
 
   bottomBar: {
     flexDirection: "row",
     gap: spacing(1.5),
     padding: spacing(2.5),
+    paddingBottom: spacing(3.5),
+    backgroundColor: colors.surface,
     borderTopWidth: 1,
-    borderTopColor: colors.border,
-    backgroundColor: colors.bgSoft,
+    borderTopColor: colors.line,
   },
-  navButton: { paddingVertical: spacing(2), paddingHorizontal: spacing(2.5), borderRadius: radius.md, backgroundColor: colors.surface },
-  navDisabled: { opacity: 0.4 },
-  navText: { color: colors.ink, fontWeight: "600" },
-  primaryButton: { flex: 1, paddingVertical: spacing(2), borderRadius: radius.md, backgroundColor: colors.accent, alignItems: "center" },
-  primaryText: { color: colors.accentInk, fontWeight: "800", fontSize: 17 },
-  secondaryButton: { paddingVertical: spacing(1.5), paddingHorizontal: spacing(3), borderRadius: radius.md, backgroundColor: colors.surface },
-  secondaryText: { color: colors.ink, fontWeight: "600" },
 });

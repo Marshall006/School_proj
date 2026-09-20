@@ -2,9 +2,9 @@
  * Client HTTP de l'application enfant.
  *
  * Il part du principe inverse d'un client web classique : **le reseau est
- * l'exception**. Chaque appel echoue proprement, les reponses utiles sont mises
- * en cache, et les evenements produits hors ligne sont mis en file pour etre
- * rejoues a la reconnexion.
+ * l'exception**. Chaque appel échoué proprement, les réponses utiles sont mises
+ * en cache, et les événements produits hors ligne sont mis en file pour être
+ * rejoues à la reconnexion.
  */
 
 import type {
@@ -26,18 +26,18 @@ const DEFAULT_URL = "http://localhost:8000/api/v1";
  *
  * 1. `EXPO_PUBLIC_API_URL` si elle est definie (build de production, API
  *    distante) ;
- * 2. en developpement, le serveur Expo qui a servi l'application : il relaie
- *    `/api/*` vers l'API locale (voir `metro.config.js`). Le telephone joint
- *    donc l'API par la meme adresse que le bundle — IP locale en mode LAN,
+ * 2. en développement, le serveur Expo qui a servi l'application : il relaie
+ *    `/api/*` vers l'API locale (voir `metro.config.js`). Le téléphone joint
+ *    donc l'API par la même adresse que le bundle — IP locale en mode LAN,
  *    domaine `exp.direct` en HTTPS en mode tunnel — sans rien configurer ;
- * 3. a defaut, `localhost` (simulateur sur la meme machine).
+ * 3. a defaut, `localhost` (simulateur sur la même machine).
  */
 export function apiUrl(): string {
   const fromEnv = process.env.EXPO_PUBLIC_API_URL;
   if (fromEnv && fromEnv.length > 0) return fromEnv.replace(/\/+$/, "");
 
-  // Sur le web, l'application est servie par le meme serveur que le relais :
-  // viser la meme origine supprime tout probleme de CORS.
+  // Sur le web, l'application est servie par le même serveur que le relais :
+  // viser la même origine supprimé tout problème de CORS.
   if (typeof window !== "undefined" && window.location?.origin) {
     return `${window.location.origin}/api/v1`;
   }
@@ -243,7 +243,7 @@ export const queue = {
         if (error instanceof NetworkError) {
           remaining.push(entry); // on retentera plus tard
         }
-        // Une erreur metier (code deja consomme...) ne doit pas boucler indefiniment.
+        // Une erreur metier (code déjà consommé...) ne doit pas boucler indefiniment.
       }
     }
     await storage.cache("queue", remaining);

@@ -1,15 +1,15 @@
 /**
- * Etat central de l'application enfant.
+ * État central de l'application enfant.
  *
  * Trois responsabilites :
  *
  * 1. **Le verrou.** Savoir si la tablette est ouverte ou fermee, y compris
  *    sans reseau. La verite locale prime : si le minuteur local est a zero, on
- *    verrouille, meme si le serveur est injoignable.
- * 2. **Le minuteur.** Compter le temps ecran a l'aide d'une horloge monotone,
+ *    verrouillé, même si le serveur est injoignable.
+ * 2. **Le minuteur.** Compter le temps écran à l'aide d'une horloge monotone,
  *    se figer quand l'application passe en arriere-plan, et se resynchroniser
  *    avec le serveur des que possible.
- * 3. **La synchronisation.** Recuperer les regles et la carence, rejouer la
+ * 3. **La synchronisation.** Recuperer les règles et la carence, rejouer la
  *    file d'attente hors ligne, signaler les codes revoques.
  */
 
@@ -62,6 +62,7 @@ interface AppValue {
   pendingSync: number;
   messages: string[];
   pair: (code: string, deviceName: string) => Promise<void>;
+  redeemXp: (xpToSpend?: number) => Promise<{ granted_minutes: number }>;
   submitCode: (code: string) => Promise<{ ok: boolean; message?: string; minutes?: number }>;
   sync: () => Promise<void>;
   lockNow: () => Promise<void>;
@@ -226,7 +227,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  // --- Ecran eteint / application en arriere-plan --------------------------
+  // --- Écran eteint / application en arriere-plan --------------------------
   useEffect(() => {
     const subscription = RNAppState.addEventListener("change", (status: AppStateStatus) => {
       const timer = timerRef.current;
@@ -236,7 +237,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         void sendHeartbeat(true);
         void sync();
       } else {
-        // Le minuteur se fige : le temps d'ecran ne s'ecoule pas ecran eteint.
+        // Le minuteur se fige : le temps d'écran ne s'ecoule pas écran eteint.
         timer.pause();
         void sendHeartbeat(false);
       }
@@ -270,9 +271,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const submitCode = useCallback(
     async (code: string): Promise<{ ok: boolean; message?: string; minutes?: number }> => {
       const id = identityRef.current;
-      if (!id) return { ok: false, message: "Cet appareil n'est pas appaire." };
+      if (!id) return { ok: false, message: "Cet appareil n'est pas appairé." };
 
-      // 1. Verification locale : elle fonctionne meme sans reseau.
+      // 1. Vérification locale : elle fonctionne même sans reseau.
       const attempt = await lockGuard.attempt({
         code,
         secretHex: id.deviceSecret,
@@ -315,12 +316,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
           ok: true,
           minutes: result.granted_minutes,
           message: result.truncated_by_cap
-            ? "Le plafond du jour a reduit la duree accordee."
+            ? "Le plafond du jour a reduit la durée accordée."
             : undefined,
         };
       } catch (error) {
         if (error instanceof NetworkError) {
-          // Hors ligne : on note la consommation pour la declarer plus tard.
+          // Hors ligne : on note la consommation pour la déclarer plus tard.
           await queue.push({
             path: "/unlock/redeem",
             method: "POST",
@@ -330,18 +331,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
           setPendingSync(await queue.size());
           return { ok: true, minutes: attempt.payload.durationMinutes };
         }
-        // Refus du serveur (code revoque, couvre-feu, plafond) : on referme.
+        // Refus du serveur (code révoqué, couvre-feu, plafond) : on referme.
         timerRef.current = null;
         setSession(null);
         setRemainingMs(0);
         setPhase("locked");
         return {
           ok: false,
-          message: error instanceof ApiError ? error.message : "Deverrouillage refuse.",
+          message: error instanceof ApiError ? error.message : "Déverrouillage refuse.",
         };
       }
     },
     [],
+  );
+
+  /** Conversion des points d'expérience en minutes d'écran. */
+  const redeemXp = useCallback(
+    async (xpToSpend?: number) => {
+      const id = identityRef.current;
+      if (!id) throw new ApiError(400, "not_paired", "Cet appareil n'est pas appairé.", {});
+      const result = await api.redeemXp(id.deviceToken, {
+        child_id: id.childId,
+        ...(xpToSpend ? { xp_to_spend: xpToSpend } : {}),
+      });
+      // Le solde d'XP et la session viennent du serveur : on resynchronise.
+      await syncWith(id);
+      return result;
+    },
+    [syncWith],
   );
 
   const lockNow = useCallback(async () => {
@@ -384,12 +401,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       pendingSync,
       messages,
       pair,
+      redeemXp,
       submitCode,
       sync,
       lockNow,
       reset,
     }),
-    [phase, identity, child, policy, lockout, online, remainingMs, session, pendingSync, messages, pair, submitCode, sync, lockNow, reset],
+    [phase, identity, child, policy, lockout, online, remainingMs, session, pendingSync, messages, pair, redeemXp, submitCode, sync, lockNow, reset],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
@@ -397,6 +415,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
 export function useApp(): AppValue {
   const context = useContext(AppContext);
-  if (!context) throw new Error("useApp doit etre utilise dans AppProvider");
+  if (!context) throw new Error("useApp doit être utilisé dans AppProvider");
   return context;
 }

@@ -1,9 +1,9 @@
 /**
  * Persistance locale.
  *
- * Le secret d'appareil va dans le magasin securise du systeme (Keychain /
- * Keystore) : c'est la cle qui autorise la validation des codes hors ligne.
- * Le reste (compteur, cache des regles, file d'attente de synchronisation)
+ * Le secret d'appareil va dans le magasin sécurisé du système (Keychain /
+ * Keystore) : c'est la clé qui autorisé la validation des codes hors ligne.
+ * Le reste (compteur, cache des règles, file d'attente de synchronisation)
  * vit dans le stockage ordinaire.
  */
 
@@ -42,7 +42,7 @@ async function secureSet(key: string, value: string): Promise<void> {
     await SecureStore.setItemAsync(key, value);
     return;
   }
-  // Le web et certains emulateurs n'exposent pas de magasin securise.
+  // Le web et certains emulateurs n'exposent pas de magasin sécurisé.
   await AsyncStorage.setItem(`fallback:${key}`, value);
 }
 

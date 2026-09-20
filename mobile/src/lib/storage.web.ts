@@ -4,17 +4,17 @@
  * Metro choisit automatiquement ce fichier plutot que `storage.ts` quand la
  * plateforme est le web. Deux raisons a cette separation :
  *
- * - `@react-native-async-storage/async-storage` echoue au chargement dans un
+ * - `@react-native-async-storage/async-storage` échoué au chargement dans un
  *   navigateur (incompatibilite d'interoperabilite de sa dependance
- *   `merge-options`), ce qui suffit a faire planter l'application entiere ;
+ *   `merge-options`), ce qui suffit à faire planter l'application entiere ;
  * - `expo-secure-store` n'a pas d'equivalent navigateur.
  *
  * L'API publique est identique a celle de `storage.ts` : le reste du code ne
  * sait pas sur quelle plateforme il tourne.
  *
  * ATTENTION : dans un navigateur, le secret d'appareil est stocke en clair
- * dans `localStorage`, la ou le natif utilise le Keychain / Keystore. Le mode
- * web sert a faire tourner et demontrer l'application sans telephone, pas a
+ * dans `localStorage`, la ou le natif utilisé le Keychain / Keystore. Le mode
+ * web sert à faire tourner et demontrer l'application sans téléphone, pas a
  * equiper l'appareil d'un enfant.
  */
 

@@ -1,13 +1,13 @@
 /**
  * Minuteur local.
  *
- * Il s'appuie sur une horloge **monotone** : `Date.now()` peut etre manipule
+ * Il s'appuie sur une horloge **monotone** : `Date.now()` peut être manipule
  * en changeant l'heure de la tablette, alors que le temps ecoule depuis le
  * demarrage de l'application ne peut pas reculer. Le serveur recoit cette
  * mesure et non l'heure murale.
  *
- * Quand l'ecran s'eteint (application en arriere-plan), le minuteur se met en
- * pause : c'est la regle du produit, et c'est ici qu'elle est appliquee.
+ * Quand l'écran s'eteint (application en arriere-plan), le minuteur se met en
+ * pause : c'est la règle du produit, et c'est ici qu'elle est appliquée.
  */
 
 export interface TimerSnapshot {
@@ -42,7 +42,7 @@ export class ScreenTimer {
     }
   }
 
-  /** Ecran eteint ou application en arriere-plan : on fige le decompte. */
+  /** Écran eteint ou application en arriere-plan : on fige le decompte. */
   pause(): void {
     if (this.startedAt !== null) {
       this.consumedMs += ScreenTimer.monotonic() - this.startedAt;
@@ -55,7 +55,7 @@ export class ScreenTimer {
     return Math.round(this.consumedMs + live);
   }
 
-  /** Valeur transmise au serveur : temps monotone consomme depuis le debut. */
+  /** Valeur transmise au serveur : temps monotone consommé depuis le debut. */
   get monotonicMs(): number {
     return this.activeMs;
   }
@@ -72,7 +72,7 @@ export class ScreenTimer {
     this.grantedMs += extraMs;
   }
 
-  /** Recalage sur la verite du serveur, sans jamais rendre du temps deja consomme. */
+  /** Recalage sur la verite du serveur, sans jamais rendre du temps déjà consommé. */
   reconcile(serverConsumedMs: number, serverGrantedMs: number): void {
     this.grantedMs = serverGrantedMs;
     if (serverConsumedMs > this.activeMs) {

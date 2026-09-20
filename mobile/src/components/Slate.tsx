@@ -3,7 +3,7 @@
  *
  * Le trace est conserve sous forme **vectorielle** (listes de points) et non en
  * image : c'est leger a transmettre, redimensionnable, et le parent peut le
- * revoir tel quel dans son tableau de bord pour valider une reponse que la
+ * revoir tel quel dans son tableau de bord pour valider une réponse que la
  * reconnaissance n'a pas su lire.
  */
 
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.line,
   },
   placeholder: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, alignItems: "center", justifyContent: "center" },
   placeholderText: { color: "#94a3b8", fontSize: 15 },

@@ -4,9 +4,9 @@
  * Deux modes coexistent, comme le prevoit le cahier des charges :
  *
  * - **assiste** : pave adapte, constructeur de fraction, potence de division,
- *   operation posee, QCM, remise en ordre, associations ;
+ *   opération posee, QCM, remise en ordre, associations ;
  * - **manuscrit** : l'ardoise, ou l'enfant pose son calcul comme sur une
- *   feuille. Ce qu'il ecrit est transmis tel quel ; si la transcription est
+ *   feuille. Ce qu'il écrit est transmis tel quel ; si la transcription est
  *   douteuse, c'est un parent qui tranchera plutot que la machine.
  *
  * Le serveur decrit dans `input_spec` le clavier et le gabarit a utiliser :
@@ -44,7 +44,7 @@ function parseDivision(prompt: string): { dividend: string; divisor: string } | 
   return { dividend: match[1].trim(), divisor: match[2] };
 }
 
-/** Extrait « 345 + 678 » pour l'operation posee. */
+/** Extrait « 345 + 678 » pour l'opération posee. */
 function parseColumn(prompt: string): { left: string; right: string; operator: string } | null {
   const match = prompt.match(/([\d   ,.]+)\s*([+\-x×])\s*([\d   ,.]+)/);
   if (!match) return null;
@@ -107,7 +107,7 @@ export function AnswerInput({
           }
         />
         <View style={styles.transcriptRow}>
-          <Text style={styles.label}>Recopie ton resultat</Text>
+          <Text style={styles.label}>Recopie ton résultat</Text>
           <TextInput
             style={styles.transcript}
             value={String((state.answer?.transcript as string | undefined) ?? "")}
@@ -218,7 +218,7 @@ export function AnswerInput({
           style={styles.textAnswer}
           value={textValue}
           onChangeText={(text) => setAnswer({ value: text })}
-          placeholder="Ecris ta reponse"
+          placeholder="Écris ta réponse"
           placeholderTextColor={colors.inkFaint}
           autoCapitalize="none"
           autoCorrect={false}
@@ -291,7 +291,7 @@ function BigNumberField({ value, onChange }: { value: string; onChange: (value: 
         placeholder="—"
         placeholderTextColor={colors.inkFaint}
         keyboardType="numbers-and-punctuation"
-        accessibilityLabel="Ta reponse"
+        accessibilityLabel="Ta réponse"
       />
     </View>
   );
@@ -313,13 +313,13 @@ function ModeSwitch({
         style={[styles.modeButton, mode === "assisted" && styles.modeButtonActive]}
         onPress={() => onChange("assisted")}
       >
-        <Text style={[styles.modeText, mode === "assisted" && styles.modeTextActive]}>Mode assiste</Text>
+        <Text style={[styles.modeText, mode === "assisted" && styles.modeTextActive]}>✏️  Mode assiste</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.modeButton, mode === "handwritten" && styles.modeButtonActive]}
         onPress={() => onChange("handwritten")}
       >
-        <Text style={[styles.modeText, mode === "handwritten" && styles.modeTextActive]}>Ardoise</Text>
+        <Text style={[styles.modeText, mode === "handwritten" && styles.modeTextActive]}>🖐  Ardoise</Text>
       </TouchableOpacity>
     </View>
   );
@@ -329,15 +329,28 @@ const styles = StyleSheet.create({
   modeSwitch: {
     flexDirection: "row",
     gap: 4,
-    backgroundColor: colors.bgSoft,
-    padding: 4,
+    backgroundColor: colors.surfaceAlt,
+    padding: 5,
     borderRadius: radius.pill,
-    alignSelf: "flex-start",
+    alignSelf: "stretch",
   },
-  modeButton: { paddingVertical: 7, paddingHorizontal: 16, borderRadius: radius.pill },
-  modeButtonActive: { backgroundColor: colors.accent },
-  modeText: { color: colors.inkMuted, ...type.small },
-  modeTextActive: { color: colors.accentInk, fontWeight: "700" },
+  modeButton: {
+    flex: 1,
+    minHeight: 44,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: radius.pill,
+  },
+  modeButtonActive: {
+    backgroundColor: colors.surface,
+    shadowColor: "#0f1d3d",
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  modeText: { color: colors.inkSoft, ...type.small, fontWeight: "600" },
+  modeTextActive: { color: colors.primaryDeep, fontWeight: "800" },
 
   bigFieldWrap: { alignItems: "center" },
   bigField: {
@@ -348,7 +361,7 @@ const styles = StyleSheet.create({
     color: colors.ink,
     paddingVertical: spacing(1),
     borderBottomWidth: 3,
-    borderBottomColor: colors.accent,
+    borderBottomColor: colors.primary,
   },
   textAnswer: {
     fontSize: 20,
@@ -357,7 +370,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     padding: spacing(2),
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.line,
   },
   blankRow: { flexDirection: "row", alignItems: "center", gap: spacing(1.5) },
   blankInput: {
@@ -368,9 +381,9 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
     padding: spacing(1.5),
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.line,
   },
-  label: { color: colors.inkMuted, ...type.small, minWidth: 96 },
+  label: { color: colors.inkSoft, ...type.small, minWidth: 96 },
   caption: { color: colors.inkFaint, ...type.small },
   transcriptRow: { flexDirection: "row", alignItems: "center", gap: spacing(1.5) },
   transcript: {
@@ -382,6 +395,6 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
     padding: spacing(1.5),
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.line,
   },
 });

@@ -2,9 +2,9 @@
  * Demande de confirmation, sur toutes les plateformes.
  *
  * `Alert.alert` de React Native n'est pas implemente dans un navigateur : le
- * dialogue ne s'affiche jamais et l'action reste bloquee sans le moindre
- * message. Comme l'application tourne aussi sur le web (demonstration sans
- * telephone), la confirmation passe ici par le dialogue natif du navigateur.
+ * dialogue ne s'affiche jamais et l'action reste bloquée sans le moindre
+ * message. Comme l'application tourne aussi sur le web (démonstration sans
+ * téléphone), la confirmation passe ici par le dialogue natif du navigateur.
  */
 
 import { Alert, Platform } from "react-native";

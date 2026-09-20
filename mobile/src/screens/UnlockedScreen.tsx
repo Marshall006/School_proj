@@ -1,96 +1,120 @@
 /**
- * L'espace deverrouille.
+ * L'espace déverrouillé.
  *
- * Volontairement sobre : le temps d'ecran gagne se passe ailleurs, pas ici.
- * On y trouve le minuteur, la possibilite de rendre du temps volontairement,
- * et la porte d'entree vers l'auto-evaluation qui rapporte des XP.
+ * Volontairement calme : le temps gagne se passe ailleurs, pas ici. On y
+ * trouve le minuteur, de quoi rendre du temps volontairement, et la porte vers
+ * l'auto-évaluation qui rapporte des points.
  */
 
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
 
+import { ApiError } from "../api/client";
+import {
+  Avatar,
+  Banner,
+  Card,
+  Chip,
+  GhostButton,
+  PrimaryButton,
+  Ring,
+  Screen,
+  SectionTitle,
+} from "../components/kit";
 import { formatRemaining } from "../lib/timer";
 import { useApp } from "../state/AppState";
-import { colors, radius, spacing, type } from "../theme";
+import { avatarOf, colors, spacing, type } from "../theme";
 
 export function UnlockedScreen({ onPractice }: { onPractice: () => void }) {
-  const { child, remainingMs, session, lockNow, online, pendingSync } = useApp();
+  const { child, policy, remainingMs, session, lockNow, online, pendingSync, redeemXp } = useApp();
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
   const total = session?.grantedMs ?? 1;
   const ratio = Math.max(0, Math.min(1, remainingMs / total));
+  const lowOnTime = remainingMs < 5 * 60_000;
+
+  const rate = policy?.minutes_per_100_xp ?? 0;
+  const cap = policy?.xp_daily_bonus_cap_minutes ?? 0;
+  const raw = Math.floor(((child?.xp_balance ?? 0) * rate) / 100);
+  const convertible = Math.max(0, Math.min(raw, cap) - (Math.min(raw, cap) % 5));
+
+  async function convert() {
+    setBusy(true);
+    setMessage(null);
+    try {
+      const result = await redeemXp();
+      setMessage(`+${result.granted_minutes} minutes ajoutées.`);
+    } catch (err) {
+      setMessage(err instanceof ApiError ? err.message : "Conversion impossible pour le moment.");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
-    <View style={styles.root}>
+    <Screen>
       <View style={styles.header}>
-        <Text style={styles.hello}>{child?.display_name}</Text>
-        <View style={styles.badges}>
-          {child && <Text style={styles.badge}>{child.xp_balance} XP</Text>}
-          <Text style={[styles.badge, online ? styles.badgeOnline : styles.badgeOffline]}>
-            {online ? "en ligne" : "hors ligne"}
-          </Text>
-        </View>
+        <Avatar emoji={avatarOf(child?.avatar)} size={48} />
+        <Text style={styles.name}>{child?.display_name}</Text>
+        <View style={{ flex: 1 }} />
+        <Chip label={online ? "en ligne" : "hors ligne"} tone={online ? "neutral" : "gold"} />
       </View>
 
-      <View style={styles.timerCard}>
-        <Text style={styles.timerLabel}>Temps restant</Text>
-        <Text style={styles.timer}>{formatRemaining(remainingMs)}</Text>
-        <View style={styles.track}>
-          <View style={[styles.fill, { width: `${ratio * 100}%` }]} />
-        </View>
+      <Card style={styles.timerCard}>
+        <Ring value={ratio} size={230}>
+          <Text style={styles.timerLabel}>Temps restant</Text>
+          <Text style={styles.timer}>{formatRemaining(remainingMs)}</Text>
+          <Text style={styles.timerTotal}>sur {Math.round(total / 60000)} min</Text>
+        </Ring>
         <Text style={styles.timerHint}>
-          Le decompte se met en pause quand l&apos;ecran s&apos;eteint.
-          {session?.offline ? " Session ouverte hors ligne : elle sera synchronisee." : ""}
+          Le decompte s&apos;arrete quand l&apos;écran s&apos;eteint.
+          {session?.offline ? " Session ouverte hors ligne, elle sera synchronisee." : ""}
         </Text>
-      </View>
+        {lowOnTime ? (
+          <Banner tone="gold" title="Bientot fini">
+            Il te reste moins de 5 minutes. Pense a sauvegarder ce que tu fais.
+          </Banner>
+        ) : null}
+      </Card>
 
-      <TouchableOpacity style={styles.practiceCard} onPress={onPractice}>
-        <Text style={styles.practiceTitle}>Gagner du temps en plus</Text>
-        <Text style={styles.practiceText}>
-          Fais une evaluation libre : chaque bonne reponse rapporte des XP, convertibles en minutes
-          d&apos;ecran.
+      <Card>
+        <SectionTitle hint={rate > 0 ? `100 XP = ${rate} min` : undefined}>
+          Gagner plus de temps
+        </SectionTitle>
+        <Text style={styles.text}>
+          Une évaluation libre ne coute rien et rapporte des XP, convertibles en minutes.
         </Text>
-      </TouchableOpacity>
+        <PrimaryButton label="M'entraîner" icon="✏️" onPress={onPractice} />
+        {convertible >= 5 ? (
+          <PrimaryButton
+            label={`Convertir ${child?.xp_balance ?? 0} XP en ${convertible} min`}
+            icon="⭐"
+            tone="gold"
+            busy={busy}
+            onPress={() => void convert()}
+          />
+        ) : null}
+        {message ? <Text style={styles.message}>{message}</Text> : null}
+      </Card>
 
-      <View style={{ flex: 1 }} />
+      {pendingSync > 0 ? (
+        <Banner tone="gold">{pendingSync} element(s) en attente de synchronisation.</Banner>
+      ) : null}
 
-      {pendingSync > 0 && (
-        <Text style={styles.pending}>{pendingSync} evenement(s) en attente de synchronisation</Text>
-      )}
-
-      <TouchableOpacity style={styles.stopButton} onPress={() => void lockNow()}>
-        <Text style={styles.stopText}>J&apos;ai fini — garder mon temps</Text>
-      </TouchableOpacity>
-    </View>
+      <GhostButton label="J'ai fini — garder mon temps" icon="⏸" onPress={() => void lockNow()} />
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.bg, padding: spacing(2.5), paddingTop: spacing(6), gap: spacing(2) },
-  header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  hello: { color: colors.ink, ...type.title },
-  badges: { flexDirection: "row", gap: 6 },
-  badge: {
-    color: colors.inkMuted,
-    ...type.small,
-    backgroundColor: colors.surface,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: radius.pill,
-    overflow: "hidden",
-  },
-  badgeOnline: { color: colors.success },
-  badgeOffline: { color: colors.warning },
-
-  timerCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing(3), alignItems: "center", gap: spacing(1) },
-  timerLabel: { color: colors.inkMuted, ...type.small, textTransform: "uppercase", letterSpacing: 1 },
-  timer: { color: colors.ink, fontSize: 64, fontWeight: "800", fontVariant: ["tabular-nums"] },
-  track: { height: 8, width: "100%", backgroundColor: colors.bgSoft, borderRadius: 4, overflow: "hidden" },
-  fill: { height: 8, backgroundColor: colors.accent, borderRadius: 4 },
+  header: { flexDirection: "row", alignItems: "center", gap: spacing(1.5) },
+  name: { color: colors.ink, ...type.heading },
+  timerCard: { alignItems: "center" },
+  timerLabel: { color: colors.inkFaint, ...type.tiny, textTransform: "uppercase" },
+  timer: { color: colors.ink, fontSize: 48, fontWeight: "800", fontVariant: ["tabular-nums"] },
+  timerTotal: { color: colors.inkFaint, ...type.small },
   timerHint: { color: colors.inkFaint, ...type.small, textAlign: "center" },
-
-  practiceCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing(2.5), gap: 6 },
-  practiceTitle: { color: colors.ink, ...type.subtitle },
-  practiceText: { color: colors.inkMuted, ...type.small, lineHeight: 20 },
-
-  pending: { color: colors.inkFaint, ...type.small, textAlign: "center" },
-  stopButton: { backgroundColor: colors.surfaceHigh, borderRadius: radius.md, padding: spacing(2), alignItems: "center" },
-  stopText: { color: colors.ink, fontWeight: "700" },
+  text: { color: colors.inkSoft, ...type.small, lineHeight: 20 },
+  message: { color: colors.successInk, ...type.small, fontWeight: "700" },
 });
