@@ -1,11 +1,11 @@
-"""Catalogue pedagogique : pays, niveaux, matieres, notions.
+"""Catalogue pedagogique : pays, niveaux, matières, notions.
 
 Les systemes scolaires francophones ne se superposent pas exactement. En
-France le primaire compte cinq annees (CP..CM2) ; au Benin, en Cote d'Ivoire ou
+France le primaire compte cinq années (CP..CM2) ; au Bénin, en Cote d'Ivoire ou
 au Senegal il en compte six (CI, CP, CE1..CM2). On introduit donc un **indice
 de niveau** commun : le programme est defini une fois par indice, puis
 instancie pour chaque pays avec ses propres intitules de classe et son propre
-contexte (monnaie, reperes historiques et geographiques, prenoms).
+contexte (monnaie, repères historiques et geographiques, prenoms).
 
     indice   1    2    3    4    5    6     7    8    9    10
     FR       CP   CE1  CE2  CM1  CM2  6E    5E   4E   3E    -
@@ -27,14 +27,14 @@ from typing import Any
 SUBJECTS: list[dict[str, Any]] = [
     {
         "code": "math",
-        "name": "Mathematiques",
+        "name": "Mathématiques",
         "color": "#2563EB",
         "icon": "calculator",
         "position": 1,
     },
     {
         "code": "francais",
-        "name": "Francais",
+        "name": "Français",
         "color": "#DC2626",
         "icon": "book-open",
         "position": 2,
@@ -42,7 +42,7 @@ SUBJECTS: list[dict[str, Any]] = [
     {"code": "sciences", "name": "Sciences", "color": "#059669", "icon": "flask", "position": 3},
     {
         "code": "histoire_geo",
-        "name": "Histoire-Geographie",
+        "name": "Histoire-Géographie",
         "color": "#B45309",
         "icon": "globe",
         "position": 4,
@@ -56,7 +56,7 @@ SUBJECTS: list[dict[str, Any]] = [
     },
     {
         "code": "civique",
-        "name": "Education civique",
+        "name": "Éducation civique",
         "color": "#0891B2",
         "icon": "users",
         "position": 6,
@@ -137,7 +137,7 @@ COUNTRIES: list[CountrySpec] = [
     ),
     CountrySpec(
         code="BJ",
-        name="Benin",
+        name="Bénin",
         grades=AFRICA_GRADES,
         currency="XOF",
         currency_name="franc CFA",
@@ -145,7 +145,7 @@ COUNTRIES: list[CountrySpec] = [
         capital="Porto-Novo",
         given_names=["Afiavi", "Kossi", "Adjoa", "Sena", "Mawuli", "Ayo", "Dossa", "Nadia"],
         places=["Cotonou", "Parakou", "Abomey", "Natitingou", "Ouidah", "Bohicon"],
-        independence="1er aout 1960",
+        independence="1er août 1960",
         facts={
             "fleuves": ["le Niger", "l'Oueme", "le Mono"],
             "regions": ["l'Atlantique", "le Borgou", "l'Atacora", "le Zou"],
@@ -154,7 +154,7 @@ COUNTRIES: list[CountrySpec] = [
     ),
     CountrySpec(
         code="CI",
-        name="Cote d'Ivoire",
+        name="Côte d'Ivoire",
         grades=AFRICA_GRADES,
         currency="XOF",
         currency_name="franc CFA",
@@ -162,7 +162,7 @@ COUNTRIES: list[CountrySpec] = [
         capital="Yamoussoukro",
         given_names=["Aya", "Konan", "Adjoua", "Yao", "Affoue", "Kouame", "Akissi", "Bakary"],
         places=["Abidjan", "Bouake", "Korhogo", "San-Pedro", "Man", "Daloa"],
-        independence="7 aout 1960",
+        independence="7 août 1960",
         facts={
             "fleuves": ["le Bandama", "la Comoe", "le Sassandra"],
             "voisins": ["le Ghana", "le Liberia", "la Guinee", "le Mali", "le Burkina Faso"],
@@ -170,7 +170,7 @@ COUNTRIES: list[CountrySpec] = [
     ),
     CountrySpec(
         code="SN",
-        name="Senegal",
+        name="Sénégal",
         grades=AFRICA_GRADES,
         currency="XOF",
         currency_name="franc CFA",
@@ -224,8 +224,8 @@ TOPICS: list[TopicSpec] = [
     TopicSpec(
         "math.numeration",
         "math",
-        "Numeration et nombres entiers",
-        "Lire, ecrire, comparer et decomposer les nombres entiers.",
+        "Numération et nombres entiers",
+        "Lire, écrire, comparer et décomposer les nombres entiers.",
         "numeration",
         (1, 2, 3, 4, 5, 6),
         10,
@@ -234,7 +234,7 @@ TOPICS: list[TopicSpec] = [
         "math.addition",
         "math",
         "Addition et soustraction",
-        "Calcul pose et calcul mental, avec et sans retenue.",
+        "Calcul posé et calcul mental, avec et sans retenue.",
         "addition_soustraction",
         (1, 2, 3, 4, 5),
         20,
@@ -243,7 +243,7 @@ TOPICS: list[TopicSpec] = [
         "math.multiplication",
         "math",
         "Multiplication",
-        "Tables, multiplication posee, multiples.",
+        "Tables, multiplication posée, multiples.",
         "multiplication",
         (2, 3, 4, 5, 6),
         30,
@@ -252,7 +252,7 @@ TOPICS: list[TopicSpec] = [
         "math.division",
         "math",
         "Division",
-        "Division euclidienne : quotient et reste, division posee.",
+        "Division euclidienne : quotient et reste, division posée.",
         "division",
         (3, 4, 5, 6),
         40,
@@ -269,8 +269,8 @@ TOPICS: list[TopicSpec] = [
     TopicSpec(
         "math.decimaux",
         "math",
-        "Nombres decimaux",
-        "Ecriture decimale, comparaison, operations.",
+        "Nombres décimaux",
+        "Écriture décimale, comparaison, opérations.",
         "decimaux",
         (4, 5, 6, 7),
         60,
@@ -279,7 +279,7 @@ TOPICS: list[TopicSpec] = [
         "math.mesures",
         "math",
         "Grandeurs et mesures",
-        "Longueurs, masses, contenances, durees et conversions.",
+        "Longueurs, masses, contenances, durées et conversions.",
         "mesures",
         (2, 3, 4, 5, 6),
         70,
@@ -287,8 +287,8 @@ TOPICS: list[TopicSpec] = [
     TopicSpec(
         "math.geometrie",
         "math",
-        "Geometrie",
-        "Figures, perimetres, aires, angles.",
+        "Géométrie",
+        "Figures, périmètres, aires, angles.",
         "geometrie",
         (3, 4, 5, 6, 7),
         80,
@@ -296,8 +296,8 @@ TOPICS: list[TopicSpec] = [
     TopicSpec(
         "math.problemes",
         "math",
-        "Resolution de problemes",
-        "Problemes du quotidien a une ou plusieurs etapes.",
+        "Résolution de problèmes",
+        "Problèmes du quotidien à une ou plusieurs etapes.",
         "problemes",
         (2, 3, 4, 5, 6, 7),
         90,
@@ -305,7 +305,7 @@ TOPICS: list[TopicSpec] = [
     TopicSpec(
         "math.proportionnalite",
         "math",
-        "Proportionnalite et pourcentages",
+        "Proportionnalité et pourcentages",
         "Situations proportionnelles, pourcentages, echelles.",
         "proportionnalite",
         (5, 6, 7, 8),
@@ -316,7 +316,7 @@ TOPICS: list[TopicSpec] = [
         "fr.conjugaison",
         "francais",
         "Conjugaison",
-        "Present, imparfait, futur, passe compose.",
+        "Présent, imparfait, futur, passe composé.",
         "conjugaison",
         (2, 3, 4, 5, 6, 7),
         10,
@@ -334,7 +334,7 @@ TOPICS: list[TopicSpec] = [
         "fr.orthographe",
         "francais",
         "Orthographe",
-        "Homophones grammaticaux et regles d'accord.",
+        "Homophones grammaticaux et règles d'accord.",
         "orthographe",
         (2, 3, 4, 5, 6, 7),
         30,
@@ -351,8 +351,8 @@ TOPICS: list[TopicSpec] = [
     TopicSpec(
         "fr.comprehension",
         "francais",
-        "Comprehension de texte",
-        "Lire un court texte et repondre a des questions.",
+        "Compréhension de texte",
+        "Lire un court texte et répondre à des questions.",
         "comprehension",
         (3, 4, 5, 6, 7),
         50,
@@ -362,7 +362,7 @@ TOPICS: list[TopicSpec] = [
         "sc.vivant",
         "sciences",
         "Le vivant",
-        "Corps humain, animaux, vegetaux, alimentation.",
+        "Corps humain, animaux, végétaux, alimentation.",
         "sciences_vivant",
         (2, 3, 4, 5, 6, 7),
         10,
@@ -370,8 +370,8 @@ TOPICS: list[TopicSpec] = [
     TopicSpec(
         "sc.matiere",
         "sciences",
-        "Matiere et energie",
-        "Etats de la matiere, energie, environnement.",
+        "Matière et énergie",
+        "États de la matière, énergie, environnement.",
         "sciences_matiere",
         (3, 4, 5, 6, 7),
         20,
@@ -380,8 +380,8 @@ TOPICS: list[TopicSpec] = [
     TopicSpec(
         "hg.geographie",
         "histoire_geo",
-        "Geographie",
-        "Reperes du pays et du monde.",
+        "Géographie",
+        "Repères du pays et du monde.",
         "geographie",
         (3, 4, 5, 6, 7),
         10,
@@ -390,7 +390,7 @@ TOPICS: list[TopicSpec] = [
         "hg.histoire",
         "histoire_geo",
         "Histoire",
-        "Grands reperes historiques.",
+        "Grands repères historiques.",
         "histoire",
         (4, 5, 6, 7),
         20,
@@ -411,7 +411,7 @@ TOPICS: list[TopicSpec] = [
         "civ.regles",
         "civique",
         "Vivre ensemble",
-        "Regles de vie, citoyennete, securite.",
+        "Règles de vie, citoyennete, sécurité.",
         "civique",
         (3, 4, 5, 6),
         10,

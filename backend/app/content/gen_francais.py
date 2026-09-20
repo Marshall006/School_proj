@@ -1,7 +1,7 @@
-"""Generateurs de questions de francais : conjugaison, grammaire, orthographe,
-vocabulaire et comprehension de texte.
+"""Generateurs de questions de français : conjugaison, grammaire, orthographe,
+vocabulaire et compréhension de texte.
 
-La conjugaison est produite par regles (avec les irregularites usuelles
+La conjugaison est produite par règles (avec les irregularites usuelles
 explicitement listees) plutot que par une table figee : on obtient des dizaines
 d'items justes par classe, sans recopier un manuel.
 """
@@ -29,10 +29,10 @@ PRONOUN_LABEL = {
     "ils": "ils",
 }
 
-#: "au present" mais "a l'imparfait" : la preposition depend du temps.
+#: "au présent" mais "à l'imparfait" : la preposition depend du temps.
 TENSE_PHRASE = {
-    "present": "au present",
-    "imparfait": "a l'imparfait",
+    "present": "au présent",
+    "imparfait": "à l'imparfait",
     "futur": "au futur simple",
 }
 TENSE_NAME = {"present": "present", "imparfait": "imparfait", "futur": "futur simple"}
@@ -50,13 +50,13 @@ ENDINGS = {
 }
 
 REGULAR_ER = ["chanter", "danser", "marcher", "regarder", "jouer", "parler", "travailler", "aimer"]
-REGULAR_IR = ["finir", "grandir", "choisir", "reussir", "obeir", "remplir"]
+REGULAR_IR = ["finir", "grandir", "choisir", "réussir", "obéir", "remplir"]
 
 #: Verbes irreguliers frequents : formes ecrites explicitement.
 IRREGULAR: dict[str, dict[str, list[str]]] = {
-    "etre": {
-        "present": ["suis", "es", "est", "sommes", "etes", "sont"],
-        "imparfait": ["etais", "etais", "etait", "etions", "etiez", "etaient"],
+    "être": {
+        "present": ["suis", "es", "est", "sommes", "êtes", "sont"],
+        "imparfait": ["étais", "étais", "était", "étions", "étiez", "étaient"],
         "futur": ["serai", "seras", "sera", "serons", "serez", "seront"],
     },
     "avoir": {
@@ -95,6 +95,13 @@ IRREGULAR: dict[str, dict[str, list[str]]] = {
         "futur": ["verrai", "verras", "verra", "verrons", "verrez", "verront"],
     },
 }
+
+
+def with_pronoun(pronoun: str, form: str) -> str:
+    """« je » s'elide devant une voyelle : on ecrit « j'aimais », pas « je aimais »."""
+    if pronoun == "je" and form and form[0].lower() in "aeiouyéèêh":
+        return f"j'{form}"
+    return f"{pronoun} {form}"
 
 
 def conjugate(verb: str, tense: str, person: int) -> str | None:
@@ -153,9 +160,9 @@ def conjugaison(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
                 0,
                 difficulty=2 if verb not in IRREGULAR else 3,
                 explanation=(
-                    f"{TENSE_PHRASE[tense].capitalize()}, {PRONOUN_LABEL[PRONOUNS[person]]} {correct}."
+                    f"{TENSE_PHRASE[tense].capitalize()}, {with_pronoun(PRONOUN_LABEL[PRONOUNS[person]], correct)}."
                     + (
-                        " C'est un verbe irregulier a connaitre par coeur."
+                        " C'est un verbe irrégulier à connaître par cœur."
                         if verb in IRREGULAR
                         else ""
                     )
@@ -174,11 +181,11 @@ def conjugaison(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
             continue
         items.append(
             short_text(
-                f'Ecris le verbe "{verb}" conjugue {TENSE_PHRASE[tense]} avec '
+                f'Écris le verbe "{verb}" conjugue {TENSE_PHRASE[tense]} avec '
                 f'"{PRONOUN_LABEL[PRONOUNS[person]]}".',
                 [correct],
                 difficulty=3 if verb in IRREGULAR else 2,
-                explanation=f"{PRONOUN_LABEL[PRONOUNS[person]]} {correct}.",
+                explanation=f"{with_pronoun(PRONOUN_LABEL[PRONOUNS[person]], correct)}.",
                 tags=["conjugaison", tense, "production"],
                 max_distance=0,
             )
@@ -188,7 +195,7 @@ def conjugaison(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
     tense = rng.choice(["present", "imparfait", "futur"])
     items.append(
         matching(
-            f'Relie chaque pronom a la forme correcte du verbe "{verb}" {TENSE_PHRASE[tense]}.',
+            f'Relie chaque pronom à la forme correcte du verbe "{verb}" {TENSE_PHRASE[tense]}.',
             {PRONOUN_LABEL[PRONOUNS[i]]: IRREGULAR[verb][tense][i] for i in (0, 2, 3, 5)},
             difficulty=4,
             explanation=f'Conjugaison de "{verb}" {TENSE_PHRASE[tense]}.',
@@ -205,21 +212,21 @@ NATURES = [
     ("chat", "nom"),
     ("courir", "verbe"),
     ("rapide", "adjectif"),
-    ("le", "determinant"),
+    ("le", "déterminant"),
     ("elle", "pronom"),
     ("doucement", "adverbe"),
     ("maison", "nom"),
     ("bleu", "adjectif"),
     ("nous", "pronom"),
     ("manger", "verbe"),
-    ("une", "determinant"),
-    ("tres", "adverbe"),
+    ("une", "déterminant"),
+    ("très", "adverbe"),
 ]
 
 
 def grammaire(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
     items: list[dict[str, Any]] = []
-    natures = ["nom", "verbe", "adjectif", "determinant", "pronom", "adverbe"]
+    natures = ["nom", "verbe", "adjectif", "déterminant", "pronom", "adverbe"]
 
     sample = rng.sample(NATURES, min(5, len(NATURES)))
     for word, nature in sample:
@@ -239,9 +246,9 @@ def grammaire(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
     subjects = [
         ("Les enfants", "jouent", "jouent", "joue"),
         ("Le chien", "aboie", "aboie", "aboient"),
-        ("Mes soeurs", "chantent", "chantent", "chante"),
+        ("Mes sœurs", "chantent", "chantent", "chante"),
         ("Ma cousine", "arrive", "arrive", "arrivent"),
-        ("Les eleves", "ecoutent", "ecoutent", "ecoute"),
+        ("Les élèves", "ecoutent", "ecoutent", "ecoute"),
     ]
     for subject, _, correct, wrong in rng.sample(subjects, 3):
         items.append(
@@ -251,7 +258,7 @@ def grammaire(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
                 0,
                 difficulty=3,
                 explanation=(
-                    f'Le verbe s\'accorde avec son sujet "{subject}" : on ecrit "{correct}".'
+                    f'Le verbe s\'accordé avec son sujet "{subject}" : on écrit "{correct}".'
                 ),
                 tags=["grammaire", "accord_sujet_verbe"],
                 shuffle=rng,
@@ -271,10 +278,10 @@ def grammaire(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
     )
     items.append(
         true_false(
-            "Dans une phrase, le verbe s'accorde toujours avec le complement.",
+            "Dans une phrase, le verbe s'accordé toujours avec le complément.",
             False,
             difficulty=3,
-            explanation="Le verbe s'accorde avec le SUJET, pas avec le complement.",
+            explanation="Le verbe s'accordé avec le Sujet, pas avec le complément.",
             tags=["grammaire", "accord"],
         )
     )
@@ -284,7 +291,7 @@ def grammaire(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
             mcq(
                 'Dans "Nous avons visite un musee magnifique", quelle est la fonction '
                 'de "un musee magnifique" ?',
-                ["complement d'objet direct", "sujet", "complement circonstanciel", "attribut"],
+                ["complément d'objet direct", "sujet", "complément circonstanciel", "attribut"],
                 0,
                 difficulty=4,
                 explanation="On visite quoi ? Un musee magnifique : c'est le COD.",
@@ -307,25 +314,25 @@ HOMOPHONES = [
         "et",
         '"et" relie deux mots : on peut dire "et puis".',
     ),
-    ("et", "est", "Le ciel ... bleu.", "est", 'Verbe etre : on peut dire "etait".'),
+    ("et", "est", "Le ciel ... bleu.", "est", 'Verbe être : on peut dire "était".'),
     (
         "son",
         "sont",
         "Les enfants ... contents.",
         "sont",
-        'Verbe etre au pluriel : on peut dire "etaient".',
+        'Verbe être au pluriel : on peut dire "étaient".',
     ),
     (
         "son",
         "sont",
         "Il a perdu ... cahier.",
         "son",
-        'Determinant possessif : on peut dire "le sien".',
+        'Déterminant possessif : on peut dire "le sien".',
     ),
     (
         "ou",
         "ou",
-        "Tu prefres le the ... le cafe ?",
+        "Tu préfères le the ... le cafe ?",
         "ou",
         '"ou" de choix : on peut dire "ou bien".',
     ),
@@ -333,11 +340,11 @@ HOMOPHONES = [
     (
         "ces",
         "ses",
-        "Range ... affaires, elles sont a toi.",
+        "Range ... affaires, elles sont à toi.",
         "ses",
         "Possessif : ce sont les siennes.",
     ),
-    ("ces", "ses", "Regarde ... nuages !", "ces", 'Demonstratif : on peut dire "ces ...-la".'),
+    ("ces", "ses", "Regarde ... nuages !", "ces", 'Démonstratif : on peut dire "ces ...-la".'),
 ]
 
 
@@ -350,7 +357,7 @@ def orthographe(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
         options = [option_a, option_b]
         items.append(
             mcq(
-                f'Complete correctement : "{sentence}"',
+                f'Complète correctement : "{sentence}"',
                 options,
                 options.index(correct),
                 difficulty=3,
@@ -366,12 +373,12 @@ def orthographe(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
         ("bijou", "bijoux"),
         ("hibou", "hiboux"),
         ("travail", "travaux"),
-        ("gateau", "gateaux"),
+        ("gâteau", "gâteaux"),
     ]
     for singular, plural in rng.sample(plurals, 3):
         items.append(
             short_text(
-                f'Ecris le pluriel du mot "{singular}".',
+                f'Écris le pluriel du mot "{singular}".',
                 [plural],
                 difficulty=3,
                 explanation=f'Le pluriel de "{singular}" est "{plural}".',
@@ -382,11 +389,11 @@ def orthographe(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
 
     items.append(
         fill_blank(
-            'Complete : "Les fleurs que j\'... achetees ... tres belles." '
+            'Complète : "Les fleurs que j\'... achetées ... très belles." '
             "(1er trou : ai/est, 2e trou : sont/son)",
             [["ai"], ["sont"]],
             difficulty=4,
-            explanation='"j\'ai" (verbe avoir) et "sont" (verbe etre au pluriel).',
+            explanation='"j\'ai" (verbe avoir) et "sont" (verbe être au pluriel).',
             tags=["orthographe", "homophones", "texte_a_trous"],
         )
     )
@@ -396,18 +403,18 @@ def orthographe(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
 # --- Vocabulaire -----------------------------------------------------------
 
 SYNONYMS = [
-    ("content", "joyeux", ["triste", "fatigue", "lent"]),
+    ("content", "joyeux", ["triste", "fatigué", "lent"]),
     ("rapide", "vite", ["lourd", "sombre", "doux"]),
     ("maison", "habitation", ["voiture", "jardin", "route"]),
-    ("commencer", "debuter", ["finir", "arreter", "perdre"]),
+    ("commencer", "débuter", ["finir", "arrêter", "perdre"]),
     ("difficile", "ardu", ["facile", "simple", "clair"]),
 ]
 ANTONYMS = [
-    ("grand", "petit", ["enorme", "haut", "large"]),
-    ("chaud", "froid", ["tiede", "brulant", "doux"]),
+    ("grand", "petit", ["énorme", "haut", "large"]),
+    ("chaud", "froid", ["tiède", "brûlant", "doux"]),
     ("jour", "nuit", ["matin", "midi", "heure"]),
     ("monter", "descendre", ["grimper", "sauter", "avancer"]),
-    ("riche", "pauvre", ["cher", "genereux", "grand"]),
+    ("riche", "pauvre", ["cher", "généreux", "grand"]),
 ]
 
 
@@ -421,7 +428,7 @@ def vocabulaire(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
                 [synonym, *wrong],
                 0,
                 difficulty=2,
-                explanation=f'"{synonym}" a le meme sens que "{word}".',
+                explanation=f'"{synonym}" a le même sens que "{word}".',
                 tags=["vocabulaire", "synonymes"],
                 shuffle=rng,
             )
@@ -448,11 +455,11 @@ def vocabulaire(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
     root, family, intrus = rng.choice(families)
     items.append(
         mcq(
-            f'Quel mot n\'appartient PAS a la famille du mot "{root}" ?',
+            f'Quel mot n\'appartient PAS à la famille du mot "{root}" ?',
             [*family, intrus],
             3,
             difficulty=4,
-            explanation=f"\"{intrus}\" ressemble mais n'a pas le meme sens d'origine.",
+            explanation=f"\"{intrus}\" ressemble mais n'a pas le même sens d'origine.",
             tags=["vocabulaire", "familles_de_mots"],
             shuffle=rng,
         )
@@ -460,11 +467,11 @@ def vocabulaire(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
 
     items.append(
         mcq(
-            'Dans la phrase "Il a le coeur lourd", l\'expression est employee :',
+            'Dans la phrase "Il a le cœur lourd", l\'expression est employee :',
             ["au sens figure", "au sens propre"],
             0,
             difficulty=4,
-            explanation="Le coeur n'est pas vraiment lourd : c'est une image, un sens figure.",
+            explanation="Le cœur n'est pas vraiment lourd : c'est une image, un sens figure.",
             tags=["vocabulaire", "sens_propre_figure"],
             shuffle=rng,
         )
@@ -479,19 +486,19 @@ def comprehension(rng: Random, level: int, country: Any) -> list[dict[str, Any]]
     name = rng.choice(country.given_names)
     place = rng.choice(country.places)
     text = (
-        f"Ce matin, {name} s'est leve tot. La pluie tombait depuis la veille sur "
-        f"{place}, et la cour de l'ecole etait pleine de flaques. {name} a pris "
-        "son parapluie bleu, puis il a retrouve son amie Sara devant le portail. "
+        f"Ce matin, {name} s'est levé tôt. La pluie tombait depuis la veille sur "
+        f"{place}, et la cour de l'école était pleine de flaques. {name} a pris "
+        "son parapluie bleu, puis il a retrouvé son amie Sara devant le portail. "
         "Ensemble, ils ont saute par-dessus les flaques en riant, si bien qu'ils "
-        "sont arrives en classe avec les chaussures trempees. La maitresse a souri "
-        "et leur a demande de se secher les pieds avant de s'asseoir."
+        "sont arrives en classe avec les chaussures trempées. La maîtresse a souri "
+        "et leur a demandé de se secher les pieds avant de s'asseoir."
     )
-    instructions = f"Lis le texte, puis reponds.\n\n{text}"
+    instructions = f"Lis le texte, puis réponds.\n\n{text}"
 
     return [
         mcq(
             "Quel temps fait-il dans le texte ?",
-            ["Il pleut", "Il neige", "Il fait tres chaud", "Il y a du vent"],
+            ["Il pleut", "Il neige", "Il fait très chaud", "Il y a du vent"],
             0,
             difficulty=2,
             explanation='Le texte dit : "La pluie tombait depuis la veille".',
@@ -500,16 +507,16 @@ def comprehension(rng: Random, level: int, country: Any) -> list[dict[str, Any]]
             instructions=instructions,
         ),
         mcq(
-            "Pourquoi leurs chaussures sont-elles trempees ?",
+            "Pourquoi leurs chaussures sont-elles trempées ?",
             [
                 "Parce qu'ils ont saute dans les flaques",
                 "Parce qu'ils ont oublie leur parapluie",
                 "Parce qu'ils sont tombes dans une riviere",
-                "Parce qu'il a neige",
+                "Parce qu'il a neigé",
             ],
             0,
             difficulty=3,
-            explanation="C'est une deduction : ils ont saute par-dessus les flaques.",
+            explanation="C'est une déduction : ils ont saute par-dessus les flaques.",
             tags=["comprehension", "inference"],
             shuffle=rng,
             instructions=instructions,
@@ -518,29 +525,29 @@ def comprehension(rng: Random, level: int, country: Any) -> list[dict[str, Any]]
             "Comment s'appelle l'amie rencontree devant le portail ?",
             ["Sara"],
             difficulty=2,
-            explanation='Le texte precise : "il a retrouve son amie Sara".',
+            explanation='Le texte précise : "il a retrouvé son amie Sara".',
             tags=["comprehension", "prelevement"],
             max_distance=1,
             instructions=instructions,
         ),
         true_false(
-            "La maitresse s'est mise en colere.",
+            "La maîtresse s'est mise en colere.",
             False,
             difficulty=3,
             explanation="Non : le texte dit qu'elle a souri.",
             tags=["comprehension", "interpretation"],
         ),
         mcq(
-            "Quel titre conviendrait le mieux a ce texte ?",
+            "Quel titre conviendrait le mieux à ce texte ?",
             [
                 "Une matinee sous la pluie",
-                "Les vacances a la mer",
+                "Les vacances à la mer",
                 "La recette du gateau",
                 "Le match de football",
             ],
             0,
             difficulty=4,
-            explanation="Le texte raconte une matinee pluvieuse sur le chemin de l'ecole.",
+            explanation="Le texte raconte une matinee pluvieuse sur le chemin de l'école.",
             tags=["comprehension", "titre"],
             shuffle=rng,
         ),

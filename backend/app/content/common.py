@@ -2,7 +2,7 @@
 
 Elles centralisent la forme du JSON attendu par le correcteur et par
 l'interface enfant (`input_spec` decrit le clavier, la palette de symboles, le
-gabarit d'operation posee et l'autorisation de l'ardoise manuscrite).
+gabarit d'opération posée et l'autorisation de l'ardoise manuscrite).
 """
 
 from __future__ import annotations
@@ -50,13 +50,13 @@ WIDGET_FRACTION = {
 WIDGET_LONG_DIVISION = {
     "keypad": "numeric",
     "widget": "long_division",  # barres de division glissables (mode assiste)
-    "template": "division_posee",
+    "template": "division_posée",
     "allow_handwriting": True,
 }
 WIDGET_COLUMN_OP = {
     "keypad": "numeric",
-    "widget": "column_operation",  # operation posee en colonnes, retenues incluses
-    "template": "operation_posee",
+    "widget": "column_opération",  # opération posée en colonnes, retenues incluses
+    "template": "opération_posée",
     "allow_handwriting": True,
 }
 WIDGET_CHOICE = {"keypad": "none", "allow_handwriting": False}
@@ -107,7 +107,7 @@ def mcq(
     instructions: str | None = None,
     estimated_seconds: int = 40,
 ) -> dict[str, Any]:
-    """QCM a reponse unique. `shuffle` melange les propositions de facon reproductible."""
+    """QCM à réponse unique. `shuffle` melange les propositions de facon reproductible."""
     pairs = list(enumerate(options))
     if shuffle is not None:
         shuffle.shuffle(pairs)
@@ -150,7 +150,7 @@ def mcq_multi(
         letters[i] for i, (original, _) in enumerate(pairs) if original in correct_indexes
     ]
     item = _base(
-        prompt + " (plusieurs reponses possibles)",
+        prompt + " (plusieurs réponses possibles)",
         QuestionType.MCQ_MULTI,
         difficulty=difficulty,
         explanation=explanation,
@@ -237,7 +237,7 @@ def expression(
     accept: list[Any] | None = None,
     instructions: str | None = None,
 ) -> dict[str, Any]:
-    """Reponse saisie avec les composants assistes (fractions, operations posees)."""
+    """Réponse saisie avec les composants assistes (fractions, opérations posées)."""
     item = _base(
         prompt,
         QuestionType.EXPRESSION,
@@ -296,7 +296,7 @@ def fill_blank(
     tags: list[str] | None = None,
     instructions: str | None = None,
 ) -> dict[str, Any]:
-    """Texte a trous. `prompt` contient des `...` ; `blanks[i]` liste les acceptes."""
+    """Texte à trous. `prompt` contient des `...` ; `blanks[i]` liste les acceptes."""
     item = _base(
         prompt,
         QuestionType.FILL_BLANK,
@@ -304,7 +304,7 @@ def fill_blank(
         explanation=explanation,
         tags=tags,
         input_spec=WIDGET_TEXT,
-        instructions=instructions or "Complete chaque trou.",
+        instructions=instructions or "Complète chaque trou.",
         estimated_seconds=60,
         points=1.0,
     )
@@ -344,7 +344,7 @@ def ordering(
         explanation=explanation,
         tags=tags,
         input_spec=WIDGET_DRAG,
-        instructions="Remets les elements dans le bon ordre.",
+        instructions="Remets les éléments dans le bon ordre.",
         estimated_seconds=60,
     )
     item["choices"] = [{"id": i, "text": text} for i, text in shown]
@@ -372,7 +372,7 @@ def matching(
         explanation=explanation,
         tags=tags,
         input_spec=WIDGET_DRAG,
-        instructions="Relie chaque element a sa reponse.",
+        instructions="Relie chaque élément à sa réponse.",
         estimated_seconds=70,
     )
     item["choices"] = [
@@ -392,7 +392,7 @@ def handwritten(
     tags: list[str] | None = None,
     instructions: str | None = None,
 ) -> dict[str, Any]:
-    """Item pose sur l'ardoise : l'enfant ecrit, l'app transcrit, le parent arbitre."""
+    """Item pose sur l'ardoise : l'enfant écrit, l'app transcrit, le parent arbitre."""
     item = _base(
         prompt,
         QuestionType.HANDWRITTEN,
@@ -400,7 +400,7 @@ def handwritten(
         explanation=explanation,
         tags=tags,
         input_spec={"keypad": "none", "widget": "canvas", "allow_handwriting": True},
-        instructions=instructions or "Pose et effectue l'operation sur l'ardoise.",
+        instructions=instructions or "Pose et effectue l'opération sur l'ardoise.",
         estimated_seconds=120,
         points=2.0,
     )
@@ -416,7 +416,7 @@ def handwritten(
 
 
 def fmt_int(value: int) -> str:
-    """Ecriture francaise des grands nombres : 1 234 567."""
+    """Ecriture française des grands nombres : 1 234 567."""
     return f"{value:,}".replace(",", " ")
 
 
@@ -428,7 +428,7 @@ def money(value: float, country: Any) -> str:
     """Prix localise : 3,50 EUR en France, 350 FCFA en zone franc."""
     amount = value * country.money_scale
     if country.money_scale == 1:
-        return f"{fmt_decimal(amount)} EUR"
+        return f"{fmt_decimal(amount)} €"
     return f"{fmt_int(int(round(amount)))} FCFA"
 
 

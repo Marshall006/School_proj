@@ -2,8 +2,8 @@
 
 Le remplissage est **idempotent** et **deterministe** : chaque question porte
 une reference stable (`external_ref`), et le tirage aleatoire est ensemence par
-cette meme reference. Relancer le seed n'ajoute donc jamais de doublon et
-produit exactement la meme banque, ce qui rend les tests et les migrations de
+cette même reference. Relancer le seed n'ajoute donc jamais de doublon et
+produit exactement la même banque, ce qui rend les tests et les migrations de
 contenu previsibles.
 """
 
@@ -39,13 +39,23 @@ def _stable_seed(*parts: str) -> int:
 
 
 async def seed_subjects(db: AsyncSession) -> int:
-    existing = {row.code for row in (await db.execute(select(Subject))).scalars()}
+    """Cree les matieres manquantes et rafraichit les intitules existants.
+
+    Un libelle corrige (une faute, un accent oublie) doit se propager sans
+    qu'on ait a reconstruire la base : les matieres sont referencees par leur
+    code, jamais par leur nom.
+    """
+    existing = {row.code: row for row in (await db.execute(select(Subject))).scalars()}
     created = 0
     for spec in SUBJECTS:
-        if spec["code"] in existing:
+        row = existing.get(spec["code"])
+        if row is None:
+            db.add(Subject(**spec))
+            created += 1
             continue
-        db.add(Subject(**spec))
-        created += 1
+        for field, value in spec.items():
+            if getattr(row, field) != value:
+                setattr(row, field, value)
     await db.flush()
     return created
 
@@ -79,7 +89,7 @@ async def seed_grade_levels(db: AsyncSession, countries: tuple[str, ...]) -> int
 async def seed_topics(db: AsyncSession, countries: tuple[str, ...], levels: tuple[int, ...]) -> int:
     subjects = {row.code: row.id for row in (await db.execute(select(Subject))).scalars()}
     existing = {
-        (row.country_code, row.grade_code, row.code)
+        (row.country_code, row.grade_code, row.code): row
         for row in (await db.execute(select(Topic))).scalars()
     }
     created = 0
@@ -88,7 +98,13 @@ async def seed_topics(db: AsyncSession, countries: tuple[str, ...], levels: tupl
             for grade in grades_at_level(country_code, level):
                 for spec in topics_for_level(level):
                     key = (country_code, grade.code, spec.code)
-                    if key in existing:
+                    row = existing.get(key)
+                    if row is not None:
+                        # Intitule ou description corriges : on les propage.
+                        row.name = spec.name
+                        row.description = spec.description
+                        row.position = spec.position
+                        row.is_core = spec.is_core
                         continue
                     db.add(
                         Topic(
@@ -111,13 +127,16 @@ async def seed_topics(db: AsyncSession, countries: tuple[str, ...], levels: tupl
 async def seed_questions(
     db: AsyncSession, countries: tuple[str, ...], levels: tuple[int, ...]
 ) -> int:
-    """Genere la banque d'items pour chaque (pays, classe, notion)."""
+    """Généré la banque d'items pour chaque (pays, classe, notion)."""
     topic_rows = list((await db.execute(select(Topic))).scalars())
     topics_by_key = {(t.country_code, t.grade_code, t.code): t for t in topic_rows}
 
-    existing_refs = {
-        row for row in (await db.execute(select(Question.external_ref))).scalars() if row
+    existing_questions = {
+        row.external_ref: row
+        for row in (await db.execute(select(Question))).scalars()
+        if row.external_ref
     }
+    refreshed = 0
     spec_by_code = {t.code: t for t in TOPICS}
     created = 0
 
@@ -139,7 +158,7 @@ async def seed_questions(
                         items = generator(rng, level, country)
                     except Exception:  # pragma: no cover - un generateur ne doit pas tout casser
                         logger.exception(
-                            "Generateur %s en echec pour %s/%s",
+                            "Generateur %s en échec pour %s/%s",
                             spec.generator,
                             country_code,
                             grade.code,
@@ -148,7 +167,25 @@ async def seed_questions(
 
                     for index, item in enumerate(items):
                         ref = f"{country_code}-{grade.code}-{spec.code}-{index:03d}"
-                        if ref in existing_refs:
+                        row = existing_questions.get(ref)
+                        if row is not None:
+                            # L'item existe : on rafraichit sa partie redactionnelle
+                            # (enonce, corrige, explication) sans toucher a son
+                            # historique d'usage ni a sa difficulte calibree.
+                            editorial = {
+                                "prompt": item["prompt"],
+                                "instructions": item.get("instructions"),
+                                "choices": item.get("choices"),
+                                "answer": item["answer"],
+                                "explanation": item.get("explanation"),
+                                "hints": item.get("hints") or [],
+                                "input_spec": item.get("input_spec") or {},
+                                "tags": item.get("tags") or [],
+                            }
+                            if any(getattr(row, f) != v for f, v in editorial.items()):
+                                for field, value in editorial.items():
+                                    setattr(row, field, value)
+                                refreshed += 1
                             continue
                         db.add(
                             Question(
@@ -170,11 +207,13 @@ async def seed_questions(
                                 source="koda-core",
                             )
                         )
-                        existing_refs.add(ref)
+                        existing_questions[ref] = None  # type: ignore[assignment]
                         created += 1
                     if created and created % 500 == 0:
                         await db.flush()
     await db.flush()
+    if refreshed:
+        logger.info("%s question(s) mises a jour (texte corrige)", refreshed)
     return created
 
 
@@ -184,7 +223,7 @@ async def seed_all(
     countries: tuple[str, ...] = DEFAULT_SEED_COUNTRIES,
     levels: tuple[int, ...] = DEFAULT_SEED_LEVELS,
 ) -> dict[str, int]:
-    """Remplit (ou complete) la banque. Sans effet si tout est deja la."""
+    """Remplit (ou complète) la banque. Sans effet si tout est déjà la."""
     report = {
         "subjects": await seed_subjects(db),
         "grade_levels": await seed_grade_levels(db, countries),

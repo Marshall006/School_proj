@@ -1,11 +1,11 @@
-"""Generateurs de questions de mathematiques.
+"""Generateurs de questions de mathématiques.
 
-Chaque fonction recoit un generateur aleatoire *deja ensemence* (le tirage est
-donc reproductible : meme pays, meme classe, meme banque de questions), l'indice
+Chaque fonction recoit un generateur aleatoire *déjà ensemence* (le tirage est
+donc reproductible : même pays, même classe, même banque de questions), l'indice
 de niveau et le contexte pays (monnaie, prenoms, lieux).
 
-Les enonces sont localises : un probleme de monnaie parle d'euros en France et
-de francs CFA au Benin, en Cote d'Ivoire ou au Senegal, avec des ordres de
+Les enonces sont localises : un problème de monnaie parle d'euros en France et
+de francs CFA au Bénin, en Cote d'Ivoire ou au Senegal, avec des ordres de
 grandeur credibles dans chaque cas.
 """
 
@@ -44,7 +44,7 @@ def _span(level: int) -> int:
 
 
 def _diff(level: int, base: int) -> int:
-    """Ajuste la difficulte editoriale a la classe."""
+    """Ajuste la difficulte editoriale à la classe."""
     return max(1, min(5, base))
 
 
@@ -56,7 +56,7 @@ def _diff(level: int, base: int) -> int:
 def numeration(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
     span = _span(level)
     items: list[dict[str, Any]] = []
-    positions = ["unites", "dizaines", "centaines", "milliers"][: 2 + min(2, level - 1)]
+    positions = ["unités", "dizaines", "centaines", "milliers"][: 2 + min(2, level - 1)]
 
     for _ in range(3):
         n = rng.randint(span // 10, span - 1)
@@ -68,7 +68,7 @@ def numeration(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
                 digit,
                 difficulty=_diff(level, 2),
                 explanation=(
-                    f"On compte les rangs a partir de la droite : "
+                    f"On compte les rangs à partir de la droite : "
                     f"{' , '.join(positions)}. Le chiffre des {positions[index]} de "
                     f"{fmt_int(n)} est {digit}."
                 ),
@@ -82,13 +82,13 @@ def numeration(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
             count = n // 10
             items.append(
                 numeric(
-                    f"Combien de dizaines entieres contient le nombre {fmt_int(n)} ?",
+                    f"Combien de dizaines entières contient le nombre {fmt_int(n)} ?",
                     count,
                     difficulty=_diff(level, 3),
                     explanation=(
                         f"Attention : on demande le *nombre* de dizaines, pas le chiffre "
                         f"des dizaines. {fmt_int(n)} = {fmt_int(count)} dizaines et "
-                        f"{n % 10} unites."
+                        f"{n % 10} unités."
                     ),
                     tags=["numeration", "piege_classique"],
                 )
@@ -98,10 +98,10 @@ def numeration(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
         n = rng.randint(span // 20, span - 1)
         items.append(
             numeric(
-                f"Ecris en chiffres : {en_lettres(n)}.",
+                f"Écris en chiffres : {en_lettres(n)}.",
                 n,
                 difficulty=_diff(level, 2),
-                explanation=f"{en_lettres(n)} s'ecrit {fmt_int(n)}.",
+                explanation=f"{en_lettres(n)} s'écrit {fmt_int(n)}.",
                 tags=["numeration", "lecture"],
             )
         )
@@ -120,7 +120,7 @@ def numeration(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
                 difficulty=_diff(level, 2),
                 explanation=(
                     "Pour comparer, on regarde d'abord le nombre de chiffres, "
-                    "puis les chiffres de gauche a droite."
+                    "puis les chiffres de gauche à droite."
                 ),
                 tags=["numeration", "comparaison"],
             )
@@ -147,12 +147,12 @@ def numeration(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
             rounded = int(round(n, -2))
             items.append(
                 numeric(
-                    f"Arrondis {fmt_int(n)} a la centaine la plus proche.",
+                    f"Arrondis {fmt_int(n)} à la centaine la plus proche.",
                     rounded,
                     difficulty=_diff(level, 3),
                     explanation=(
                         f"On regarde le chiffre des dizaines ({(n // 10) % 10}) : "
-                        f"s'il est inferieur a 5 on arrondit en dessous, sinon au-dessus. "
+                        f"s'il est inférieur à 5 on arrondit en dessous, sinon au-dessus. "
                         f"On obtient {fmt_int(rounded)}."
                     ),
                     tags=["numeration", "arrondi"],
@@ -162,7 +162,7 @@ def numeration(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
     n = rng.randint(span // 10, span - 2)
     items.append(
         numeric(
-            f"Quel nombre vient juste apres {fmt_int(n)} ?",
+            f"Quel nombre vient juste après {fmt_int(n)} ?",
             n + 1,
             difficulty=1,
             explanation=f"Le successeur de {fmt_int(n)} est {fmt_int(n + 1)}.",
@@ -191,7 +191,7 @@ def addition_soustraction(rng: Random, level: int, country: Any) -> list[dict[st
                 explanation=f"{fmt_int(a)} + {fmt_int(b)} = {fmt_int(a + b)}.",
                 tags=["addition", "calcul_pose"],
                 input_spec=WIDGET_COLUMN_OP,
-                instructions="Pose l'operation en colonnes si tu en as besoin.",
+                instructions="Pose l'opération en colonnes si tu en as besoin.",
             )
         )
 
@@ -214,7 +214,7 @@ def addition_soustraction(rng: Random, level: int, country: Any) -> list[dict[st
         total = a + rng.randint(span // 10, span // 2)
         items.append(
             numeric(
-                f"Complete : {fmt_int(a)} + ... = {fmt_int(total)}",
+                f"Complète : {fmt_int(a)} + ... = {fmt_int(total)}",
                 total - a,
                 difficulty=_diff(level, 3),
                 explanation=(
@@ -245,7 +245,7 @@ def addition_soustraction(rng: Random, level: int, country: Any) -> list[dict[st
                 f"Pose et effectue : {fmt_int(a)} + {fmt_int(b)}",
                 a + b,
                 difficulty=_diff(level, 3),
-                explanation=f"Le resultat est {fmt_int(a + b)}.",
+                explanation=f"Le résultat est {fmt_int(a + b)}.",
                 tags=["addition", "ardoise"],
             )
         )
@@ -296,7 +296,7 @@ def multiplication(rng: Random, level: int, country: Any) -> list[dict[str, Any]
                 a * factor,
                 difficulty=_diff(level, 2),
                 explanation=(
-                    f"Multiplier par {factor} revient a ajouter "
+                    f"Multiplier par {factor} revient à ajouter "
                     f"{len(str(factor)) - 1} zero(s) : {fmt_int(a * factor)}."
                 ),
                 tags=["multiplication", "puissances_de_10"],
@@ -322,7 +322,7 @@ def multiplication(rng: Random, level: int, country: Any) -> list[dict[str, Any]
     a, b = rng.randint(3, 9), rng.randint(3, 9)
     items.append(
         true_false(
-            f"{a} x {b} donne le meme resultat que {b} x {a}.",
+            f"{a} x {b} donne le même résultat que {b} x {a}.",
             True,
             difficulty=1,
             explanation="La multiplication est commutative : l'ordre des facteurs ne change rien.",
@@ -352,7 +352,7 @@ def division(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
                 explanation=f"{fmt_int(dividend)} = {divisor} x {fmt_int(quotient)}, donc le quotient est {fmt_int(quotient)}.",
                 tags=["division", "division_exacte"],
                 input_spec=WIDGET_LONG_DIVISION,
-                instructions="Utilise la potence : glisse les barres pour poser ta division.",
+                instructions="Utilisé la potence : glisse les barres pour poser ta division.",
             )
         )
 
@@ -393,7 +393,7 @@ def division(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
             f"Dans la division de {fmt_int(dividend)} par {divisor}, le reste peut valoir {divisor}.",
             False,
             difficulty=_diff(level, 3),
-            explanation="Non : le reste est toujours strictement inferieur au diviseur.",
+            explanation="Non : le reste est toujours strictement inférieur au diviseur.",
             tags=["division", "propriete"],
         )
     )
@@ -451,7 +451,7 @@ def fractions(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
                 Fraction(num, den),
                 difficulty=_diff(level, 4),
                 explanation=(
-                    f"On divise le numerateur et le denominateur par {factor} : "
+                    f"On divise le numérateur et le dénominateur par {factor} : "
                     f"{num * factor}/{den * factor} = {num}/{den}."
                 ),
                 tags=["fractions", "simplification"],
@@ -468,12 +468,12 @@ def fractions(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
         items.append(
             mcq(
                 f"Quelle est la plus grande fraction : {a}/{den} ou {b}/{den} ?",
-                [f"{a}/{den}", f"{b}/{den}", "Elles sont egales"],
+                [f"{a}/{den}", f"{b}/{den}", "Elles sont égales"],
                 0 if a == bigger else 1,
                 difficulty=_diff(level, 2),
                 explanation=(
-                    "A denominateur egal, la plus grande fraction est celle qui a le "
-                    "plus grand numerateur."
+                    "A dénominateur égal, la plus grande fraction est celle qui a le "
+                    "plus grand numérateur."
                 ),
                 tags=["fractions", "comparaison"],
                 shuffle=rng,
@@ -491,7 +491,7 @@ def fractions(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
                 result,
                 difficulty=_diff(level, 3),
                 explanation=(
-                    f"Les denominateurs sont identiques : on additionne les numerateurs. "
+                    f"Les dénominateurs sont identiques : on additionne les numérateurs. "
                     f"{a}/{den} + {b}/{den} = {a + b}/{den}"
                     + (
                         f" = {result.numerator}/{result.denominator}."
@@ -510,7 +510,7 @@ def fractions(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
     num = rng.randint(1, den - 1)
     items.append(
         numeric(
-            f"Ecris {num}/{den} sous forme decimale.",
+            f"Écris {num}/{den} sous forme décimale.",
             Fraction(num, den),
             difficulty=_diff(level, 4),
             explanation=f"{num}/{den} = {num} : {den} = {fmt_decimal(num / den, 2 if den != 10 else 1)}.",
@@ -522,10 +522,10 @@ def fractions(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
 
     items.append(
         true_false(
-            "Une fraction dont le numerateur est plus grand que le denominateur est plus grande que 1.",
+            "Une fraction dont le numérateur est plus grand que le dénominateur est plus grande que 1.",
             True,
             difficulty=_diff(level, 3),
-            explanation="Oui : par exemple 7/4 = 1,75, ce qui est bien superieur a 1.",
+            explanation="Oui : par exemple 7/4 = 1,75, ce qui est bien supérieur à 1.",
             tags=["fractions", "propriete"],
         )
     )
@@ -539,7 +539,7 @@ def fractions(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
 
 def decimaux(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
     items: list[dict[str, Any]] = []
-    ranks = ["dixiemes", "centiemes", "millemes"]
+    ranks = ["dixièmes", "centièmes", "millièmes"]
 
     for _ in range(3):
         whole = rng.randint(1, 99)
@@ -553,8 +553,8 @@ def decimaux(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
                 digit,
                 difficulty=_diff(level, 3),
                 explanation=(
-                    "Apres la virgule on trouve, dans l'ordre : les dixiemes, "
-                    f"les centiemes puis les milliemes. Ici c'est {digit}."
+                    "Après la virgule on trouve, dans l'ordre : les dixièmes, "
+                    f"les centièmes puis les milliemes. Ici c'est {digit}."
                 ),
                 tags=["decimaux", "valeur_position"],
             )
@@ -569,7 +569,7 @@ def decimaux(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
                 round(a + b, 2),
                 difficulty=_diff(level, 3),
                 explanation=(
-                    "On aligne les virgules avant d'additionner. Resultat : "
+                    "On aligne les virgules avant d'additionner. Résultat : "
                     f"{fmt_decimal(round(a + b, 2))}."
                 ),
                 tags=["decimaux", "addition"],
@@ -601,11 +601,11 @@ def decimaux(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
     items.append(
         mcq(
             f"Quel est le plus grand : {fmt_decimal(a)} ou {fmt_decimal(b)} ?",
-            [fmt_decimal(a), fmt_decimal(b), "Ils sont egaux"],
+            [fmt_decimal(a), fmt_decimal(b), "Ils sont égaux"],
             1,
             difficulty=_diff(level, 3),
             explanation=(
-                "On compare d'abord la partie entiere, puis les chiffres apres la "
+                "On compare d'abord la partie entière, puis les chiffres après la "
                 "virgule, rang par rang."
             ),
             tags=["decimaux", "comparaison"],
@@ -698,8 +698,8 @@ def mesures(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
     end = (start_h * 60 + start_m + dur) % (24 * 60)
     items.append(
         short_text(
-            f"Un cours commence a {start_h}h{start_m:02d} et dure {dur} minutes. "
-            "A quelle heure se termine-t-il ? (ecris comme 14h30)",
+            f"Un cours commence à {start_h}h{start_m:02d} et dure {dur} minutes. "
+            "À quelle heure se terminé-t-il ? (écris comme 14h30)",
             [f"{end // 60}h{end % 60:02d}", f"{end // 60}h{end % 60}"],
             difficulty=_diff(level, 4),
             explanation=(f"{start_h}h{start_m:02d} + {dur} min = {end // 60}h{end % 60:02d}."),
@@ -710,11 +710,11 @@ def mesures(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
 
     items.append(
         mcq(
-            "Quelle unite convient le mieux pour mesurer la longueur d'une salle de classe ?",
-            ["le millimetre", "le metre", "le kilometre", "le gramme"],
+            "Quelle unité convient le mieux pour mesurer la longueur d'une salle de classe ?",
+            ["le millimètre", "le mètre", "le kilomètre", "le gramme"],
             1,
             difficulty=1,
-            explanation="Une salle de classe mesure quelques metres : le metre est adapte.",
+            explanation="Une salle de classe mesure quelques mètres : le mètre est adapte.",
             tags=["mesures", "unites"],
             shuffle=rng,
         )
@@ -735,11 +735,11 @@ def geometrie(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
         items.append(
             numeric(
                 f"Un rectangle mesure {length} cm de long et {width} cm de large. "
-                "Quel est son perimetre ?",
+                "Quel est son périmètre ?",
                 2 * (length + width),
                 difficulty=_diff(level, 3),
                 explanation=(
-                    f"Perimetre = 2 x (Longueur + largeur) = 2 x ({length} + {width}) = "
+                    f"Périmètre = 2 x (Longueur + largeur) = 2 x ({length} + {width}) = "
                     f"{2 * (length + width)} cm."
                 ),
                 tags=["geometrie", "perimetre"],
@@ -756,7 +756,7 @@ def geometrie(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
                 difficulty=_diff(level, 4),
                 explanation=(
                     f"Aire = Longueur x largeur = {length} x {width} = {length * width} cm2. "
-                    "Attention a ne pas confondre avec le perimetre."
+                    "Attention à ne pas confondre avec le périmètre."
                 ),
                 tags=["geometrie", "aire", "piege_classique"],
                 unit="cm2",
@@ -766,10 +766,10 @@ def geometrie(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
     side = rng.randint(3, 18)
     items.append(
         numeric(
-            f"Quel est le perimetre d'un carre de cote {side} cm ?",
+            f"Quel est le périmètre d'un carré de cote {side} cm ?",
             4 * side,
             difficulty=_diff(level, 2),
-            explanation=f"Perimetre du carre = 4 x cote = 4 x {side} = {4 * side} cm.",
+            explanation=f"Périmètre du carré = 4 x cote = 4 x {side} = {4 * side} cm.",
             tags=["geometrie", "perimetre", "carre"],
             unit="cm",
         )
@@ -777,11 +777,11 @@ def geometrie(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
 
     items.append(
         mcq(
-            "Combien de cotes possede un quadrilatere ?",
+            "Combien de côtés possede un quadrilatère ?",
             ["3", "4", "5", "6"],
             1,
             difficulty=1,
-            explanation="Le prefixe quadri- signifie quatre.",
+            explanation="Le préfixe quadri- signifie quatre.",
             tags=["geometrie", "figures"],
             shuffle=rng,
         )
@@ -789,10 +789,10 @@ def geometrie(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
     items.append(
         mcq(
             "Un angle droit mesure :",
-            ["45 degres", "90 degres", "180 degres", "360 degres"],
+            ["45 degrés", "90 degrés", "180 degrés", "360 degrés"],
             1,
             difficulty=_diff(level, 2),
-            explanation="Un angle droit mesure 90 degres : c'est le coin d'une feuille.",
+            explanation="Un angle droit mesure 90 degrés : c'est le coin d'une feuille.",
             tags=["geometrie", "angles"],
             shuffle=rng,
         )
@@ -803,7 +803,7 @@ def geometrie(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
             True,
             difficulty=_diff(level, 4),
             explanation=(
-                "Vrai : un rectangle a quatre angles droits, et le carre aussi. "
+                "Vrai : un rectangle à quatre angles droits, et le carré aussi. "
                 "En revanche tous les rectangles ne sont pas des carres."
             ),
             tags=["geometrie", "logique"],
@@ -814,10 +814,10 @@ def geometrie(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
         radius = rng.randint(2, 12)
         items.append(
             numeric(
-                f"Un cercle a un rayon de {radius} cm. Quel est son diametre ?",
+                f"Un cercle à un rayon de {radius} cm. Quel est son diamètre ?",
                 2 * radius,
                 difficulty=_diff(level, 2),
-                explanation=f"Le diametre vaut deux fois le rayon : 2 x {radius} = {2 * radius} cm.",
+                explanation=f"Le diamètre vaut deux fois le rayon : 2 x {radius} = {2 * radius} cm.",
                 tags=["geometrie", "cercle"],
                 unit="cm",
             )
@@ -842,12 +842,12 @@ def problemes(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
         total = round(unit_price * quantity, 2)
         items.append(
             numeric(
-                f"{name} achete {quantity} cahiers a {money(unit_price, country)} l'unite. "
-                "Quel est le montant total a payer ?",
+                f"{name} achète {quantity} cahiers à {money(unit_price, country)} l'unité. "
+                "Quel est le montant total à payer ?",
                 money_value(total, country),
                 difficulty=_diff(level, 3),
                 explanation=(
-                    f"On multiplie le prix unitaire par la quantite : "
+                    f"On multiplie le prix unitaire par la quantité : "
                     f"{money(unit_price, country)} x {quantity} = {money(total, country)}."
                 ),
                 tags=["probleme", "monnaie", "multiplication"],
@@ -865,7 +865,7 @@ def problemes(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
         change = round(given - spent, 2)
         items.append(
             numeric(
-                f"{name} paie avec {money(given, country)} un article a "
+                f"{name} paie avec {money(given, country)} un article à "
                 f"{money(spent, country)}. Combien lui rend-on ?",
                 money_value(change, country),
                 difficulty=_diff(level, 3),
@@ -886,7 +886,7 @@ def problemes(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
         rest = total_items % per_box
         items.append(
             numeric(
-                f"A l'ecole de {place}, on range {total_items} livres dans des cartons "
+                f"À l'école de {place}, on range {total_items} livres dans des cartons "
                 f"de {per_box} livres. Combien de cartons sont completement remplis ?",
                 boxes,
                 difficulty=_diff(level, 4),
@@ -904,8 +904,8 @@ def problemes(rng: Random, level: int, country: Any) -> list[dict[str, Any]]:
     days = rng.randint(4, 6)
     items.append(
         numeric(
-            f"{name} parcourt {distance} km chaque jour pour aller a l'ecole et en revenir. "
-            f"Quelle distance cela represente-t-il en {days} jours ?",
+            f"{name} parcourt {distance} km chaque jour pour aller à l'école et en revenir. "
+            f"Quelle distance cela représente-t-il en {days} jours ?",
             distance * days,
             difficulty=_diff(level, 3),
             explanation=f"{distance} km x {days} = {distance * days} km.",
@@ -982,7 +982,7 @@ def proportionnalite(rng: Random, level: int, country: Any) -> list[dict[str, An
     hours = rng.choice([2, 3, 4])
     items.append(
         numeric(
-            f"Une voiture roule a {speed} km/h pendant {hours} h. Quelle distance parcourt-elle ?",
+            f"Une voiture roule à {speed} km/h pendant {hours} h. Quelle distance parcourt-elle ?",
             speed * hours,
             difficulty=_diff(level, 4),
             explanation=f"Distance = vitesse x temps = {speed} x {hours} = {speed * hours} km.",
@@ -993,11 +993,11 @@ def proportionnalite(rng: Random, level: int, country: Any) -> list[dict[str, An
 
     items.append(
         true_false(
-            "Si je double la quantite achetee, le prix double aussi dans une situation "
-            "de proportionnalite.",
+            "Si je double la quantité achetée, le prix double aussi dans une situation "
+            "de proportionnalité.",
             True,
             difficulty=_diff(level, 3),
-            explanation="C'est la definition meme de la proportionnalite.",
+            explanation="C'est la definition même de la proportionnalité.",
             tags=["proportionnalite", "propriete"],
         )
     )

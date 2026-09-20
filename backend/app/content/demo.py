@@ -1,13 +1,13 @@
-"""Jeu de demonstration : un foyer credible, avec trois semaines d'historique.
+"""Jeu de démonstration : un foyer credible, avec trois semaines d'historique.
 
-Sert a deux choses :
+Sert à deux choses :
 
-- faire vivre le tableau de bord parental des la premiere minute (sans quoi il
+- faire vivre le tableau de bord parental des la première minute (sans quoi il
   n'affiche que des zeros) ;
 - fournir un scenario de bout en bout rejouable pour les demonstrations.
 
-L'historique est simule en remontant le temps applicatif : les evaluations, les
-sessions d'ecran et les mouvements d'XP sont produits par les *vrais* services,
+L'historique est simule en remontant le temps applicatif : les évaluations, les
+sessions d'écran et les mouvements d'XP sont produits par les *vrais* services,
 pas par des insertions artificielles. Ce que le tableau de bord affiche est donc
 exactement ce que produirait un usage reel.
 """
@@ -69,7 +69,7 @@ SKILL_PROFILES: dict[str, dict[str, float]] = {
 
 
 def _answer_for(question: Question, correct: bool, rng: random.Random) -> dict[str, Any]:
-    """Fabrique une reponse juste ou fausse a partir du bareme."""
+    """Fabrique une réponse juste ou fausse à partir du bareme."""
     spec = question.answer or {}
     qtype = question.type.value
     if correct:
@@ -115,7 +115,7 @@ def _answer_for(question: Question, correct: bool, rng: random.Random) -> dict[s
 
 
 async def seed_demo(db: AsyncSession, *, days: int = 21, seed: int = 20260315) -> dict[str, Any]:
-    """Cree (ou retrouve) le foyer de demonstration et son historique."""
+    """Créé (ou retrouve) le foyer de démonstration et son historique."""
     existing = (
         await db.execute(select(Parent).where(Parent.email == DEMO_EMAIL))
     ).scalar_one_or_none()
@@ -178,7 +178,7 @@ async def seed_demo(db: AsyncSession, *, days: int = 21, seed: int = 20260315) -
         PolicyProfile(
             family_id=family.id,
             period_type=PeriodType.SCHOOL,
-            name="Semaine d'ecole",
+            name="Semaine d'école",
             pass_score_pct=70.0,
             question_count=10,
             reward_minutes=90,
@@ -218,7 +218,7 @@ async def seed_demo(db: AsyncSession, *, days: int = 21, seed: int = 20260315) -
     zone = ZoneInfo(family.timezone)
 
     for offset in range(days, 0, -1):
-        # On se place a une heure credible (fin d'apres-midi), sinon le
+        # On se place a une heure credible (fin d'après-midi), sinon le
         # couvre-feu du foyer refuserait tous les deverrouillages.
         moment = (clock_now().astimezone(zone) - timedelta(days=offset)).replace(
             hour=rng.choice([16, 17, 18]), minute=rng.randrange(60), second=0, microsecond=0
@@ -285,7 +285,7 @@ async def seed_demo(db: AsyncSession, *, days: int = 21, seed: int = 20260315) -
                             policy=policy,
                         )
                         stats["sessions"] += 1
-                        # L'enfant consomme 40 a 100 % du temps accorde.
+                        # L'enfant consommé 40 à 100 % du temps accordé.
                         used = int(redeemed.session.granted_ms * rng.uniform(0.4, 1.0))
                         finished_at = clock_now() + timedelta(milliseconds=used)
                         await screen_time.heartbeat(
@@ -305,7 +305,7 @@ async def seed_demo(db: AsyncSession, *, days: int = 21, seed: int = 20260315) -
                         stats["skipped"][reason] = stats["skipped"].get(reason, 0) + 1
                 await db.commit()
 
-    # Une session ouverte a l'instant : le tableau de bord doit montrer un
+    # Une session ouverte à l'instant : le tableau de bord doit montrer un
     # minuteur qui tourne, pas seulement de l'historique.
     try:
         live_child = children[0]
@@ -316,7 +316,7 @@ async def seed_demo(db: AsyncSession, *, days: int = 21, seed: int = 20260315) -
             device=devices[live_child.display_name],
             duration_minutes=60,
             kind=proto.UnlockKind.PARENT_BONUS,
-            note="Session de demonstration",
+            note="Session de démonstration",
         )
         live = await unlock.redeem_code(
             db,
@@ -336,7 +336,7 @@ async def seed_demo(db: AsyncSession, *, days: int = 21, seed: int = 20260315) -
     except Exception as exc:
         stats["skipped"][f"live:{type(exc).__name__}"] = 1
 
-    # Un code d'appairage en attente, pour la demonstration de l'ecran d'appairage.
+    # Un code d'appairage en attente, pour la demonstration de l'écran d'appairage.
     from app.models.device import PairingRequest
 
     code = generate_pairing_code()
@@ -351,7 +351,7 @@ async def seed_demo(db: AsyncSession, *, days: int = 21, seed: int = 20260315) -
     )
     await db.commit()
 
-    logger.info("Foyer de demonstration cree : %s", stats)
+    logger.info("Foyer de démonstration créé : %s", stats)
     return {
         "created": True,
         "email": DEMO_EMAIL,

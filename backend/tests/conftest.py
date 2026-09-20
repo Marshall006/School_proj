@@ -39,17 +39,22 @@ TEST_LEVELS = (4, 5)
 
 
 @pytest.fixture(autouse=True)
-def heure_ouvree():
-    """Cale l'horloge applicative sur 15 h a Paris pendant toute la suite.
+def mardi_apres_midi():
+    """Cale l'horloge applicative sur un mardi, 15 h a Paris.
 
-    Sans cela, une suite lancee a 3 h du matin echouerait sur le couvre-feu :
-    un test ne doit jamais dependre de l'heure a laquelle on le lance.
+    Un test ne doit jamais dependre du moment ou on le lance. L'heure evite le
+    couvre-feu ; le jour evite que la periode bascule en week-end, ce qui
+    changerait les regles appliquees (une suite verte en semaine echouait le
+    dimanche).
     """
     from app.core import clock
 
     local = clock.now().astimezone(ZoneInfo("Europe/Paris"))
-    delta = timedelta(hours=15 - local.hour, minutes=-local.minute, seconds=-local.second)
-    with clock.time_travel(delta):
+    jusqu_a_mardi = (1 - local.weekday()) % 7  # 1 = mardi
+    cible = (local + timedelta(days=jusqu_a_mardi)).replace(
+        hour=15, minute=0, second=0, microsecond=0
+    )
+    with clock.time_travel(cible - clock.now()):
         yield
 
 

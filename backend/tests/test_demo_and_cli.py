@@ -133,3 +133,44 @@ def test_la_ligne_de_commande_expose_les_commandes_attendues():
     assert parser.parse_args(["seed", "--countries", "FR,BJ"]).countries == "FR,BJ"
     identifier = str(uuid.uuid4())
     assert parser.parse_args(["verify-audit", "--family", identifier]).family == identifier
+
+
+async def test_le_foyer_ne_compte_pas_les_sessions_perimees(db):
+    """Une session oubliee ne doit pas gonfler le compteur du foyer.
+
+    Regression : le tableau de bord annoncait « 1 session en cours » alors que
+    toutes les tablettes etaient verrouillees, parce que le decompte ignorait
+    le butoir absolu.
+    """
+    from datetime import timedelta
+
+    from app.core.clock import now as clock_now
+    from app.core.unlock_protocol import generate_device_secret
+    from app.models.device import Device
+    from app.models.enums import DevicePlatform
+    from app.models.family import Family
+    from app.services import screen_time
+
+    family = Family(name="Foyer", country_code="FR")
+    db.add(family)
+    await db.flush()
+    child = Child(family_id=family.id, display_name="Test", grade_code="CM1")
+    db.add(child)
+    await db.flush()
+    device = Device(
+        child_id=child.id,
+        name="Tablette",
+        platform=DevicePlatform.ANDROID,
+        device_secret=generate_device_secret(),
+    )
+    db.add(device)
+    await db.flush()
+
+    started = clock_now() - timedelta(days=1)
+    await screen_time.start_session(
+        db, child_id=child.id, device=device, duration_minutes=60, at=started
+    )
+    await db.flush()
+
+    overview = await analytics.family_overview(db, family.id)
+    assert overview["active_sessions"] == 0, "la session d'hier n'est plus en cours"

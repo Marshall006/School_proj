@@ -36,7 +36,7 @@ async def test_couverture_multi_pays(db):
 async def test_localisation_des_enonces(db):
     """Un probleme de monnaie parle euros en France, francs CFA au Benin."""
     await seed_all(db, countries=("FR", "BJ"), levels=(5,))
-    for country, devise in (("FR", "EUR"), ("BJ", "FCFA")):
+    for country, devise in (("FR", "€"), ("BJ", "FCFA")):
         rows = (
             (
                 await db.execute(
