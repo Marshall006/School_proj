@@ -12,7 +12,7 @@ const FILLS: Record<string, string> = {
 };
 
 /**
- * Repartition des notions par palier de maitrise.
+ * Répartition des notions par palier de maîtrise.
  *
  * Echelle ordonnee (fragile -> expert) : une seule teinte, du clair au fonce.
  * La legende porte les effectifs, donc la couleur n'est jamais le seul canal.
@@ -23,7 +23,7 @@ export function MasteryBar({ bands }: { bands: Record<string, number> }) {
   const total = entries.reduce((sum, entry) => sum + entry.count, 0) + (bands.unknown ?? 0);
 
   if (total === 0) {
-    return <p className="empty">Le niveau se precisera apres quelques evaluations.</p>;
+    return <p className="empty">Le niveau se precisera après quelques évaluations.</p>;
   }
 
   const width = 520;
@@ -34,7 +34,7 @@ export function MasteryBar({ bands }: { bands: Record<string, number> }) {
   return (
     <div className="chart-wrap">
       <div className="chart">
-        <svg width={width} height={height} role="img" aria-label="Repartition des notions par palier de maitrise">
+        <svg width={width} height={height} role="img" aria-label="Répartition des notions par palier de maîtrise">
           {entries.map(({ band, count }) => {
             if (count === 0) return null;
             const segmentWidth = (count / total) * width - gap;

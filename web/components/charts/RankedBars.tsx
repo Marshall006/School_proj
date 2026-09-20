@@ -10,17 +10,17 @@ export interface RankedRow {
 }
 
 /**
- * Taux de reussite par matiere, classe du plus faible au plus fort.
+ * Taux de réussite par matière, classe du plus faible au plus fort.
  *
  * Une seule teinte : la comparaison porte sur une grandeur, pas sur des
- * identites. Le trait pointille marque le seuil exige par le foyer ; les
- * matieres en dessous portent une etiquette explicite (jamais la couleur
+ * identites. Le trait pointille marque le seuil exigé par le foyer ; les
+ * matières en dessous portent une etiquette explicite (jamais la couleur
  * seule) pour rester lisibles en cas de daltonisme ou d'impression.
  */
 export function RankedBars({
   rows,
   threshold,
-  thresholdLabel = "seuil de reussite",
+  thresholdLabel = "seuil de réussite",
 }: {
   rows: RankedRow[];
   threshold?: number;
@@ -29,7 +29,7 @@ export function RankedBars({
   const { show, hide, node } = useChartTooltip();
 
   if (rows.length === 0) {
-    return <p className="empty">Aucune reponse enregistree sur la periode.</p>;
+    return <p className="empty">Aucune réponse enregistrée sur la période.</p>;
   }
 
   const rowHeight = 30;
@@ -43,7 +43,7 @@ export function RankedBars({
   return (
     <div className="chart-wrap">
       <div className="chart">
-        <svg width={width} height={height} role="img" aria-label="Taux de reussite par matiere">
+        <svg width={width} height={height} role="img" aria-label="Taux de réussite par matière">
           {[0, 0.25, 0.5, 0.75, 1].map((tick) => (
             <line key={tick} className="grid-line" x1={x(tick)} x2={x(tick)} y1={4} y2={rows.length * rowHeight} />
           ))}
@@ -62,7 +62,7 @@ export function RankedBars({
                     <>
                       <strong>{row.label}</strong>
                       <br />
-                      {row.value === null ? "aucune donnee" : `${Math.round(value * 100)} % de reussite`}
+                      {row.value === null ? "aucune donnee" : `${Math.round(value * 100)} % de réussite`}
                       {row.detail ? (
                         <>
                           <br />
@@ -96,7 +96,7 @@ export function RankedBars({
                 <text className="bar-value" x={x(value) + 8} y={top + 14}>
                   {row.value === null ? "—" : `${Math.round(value * 100)} %`}
                 </text>
-                {/* Le statut s'ecrit a cote de la barre, jamais dessus : sur un
+                {/* Le statut s'écrit à côté de la barre, jamais dessus : sur un
                     aplat colore le texte perdrait tout contraste. Icone + mot,
                     pour ne pas dependre de la couleur. */}
                 {below && (

@@ -2,6 +2,8 @@
 
 import { useEffect, type ReactNode } from "react";
 
+import { IconAlert, IconCheck, IconInfo } from "@/components/icons";
+
 export function Card({
   title,
   hint,
@@ -114,12 +116,10 @@ export function Alert({
   tone?: "info" | "good" | "warning" | "critical";
   children: ReactNode;
 }) {
-  const icons = { info: "ⓘ", good: "✓", warning: "▲", critical: "■" };
+  const Icon = tone === "good" ? IconCheck : tone === "info" ? IconInfo : IconAlert;
   return (
     <div className={`alert${tone === "info" ? "" : ` alert-${tone}`}`}>
-      <span className="alert-icon" aria-hidden="true">
-        {icons[tone]}
-      </span>
+      <Icon size={17} className="alert-icon" />
       <div>{children}</div>
     </div>
   );

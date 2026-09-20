@@ -11,18 +11,18 @@ export interface TrendPoint {
 }
 
 /**
- * Temps d'ecran jour par jour.
+ * Temps d'écran jour par jour.
  *
- * Deux nuances d'une meme teinte : la barre claire est le temps *accorde*,
- * la barre foncee le temps reellement *consomme*. Le rapport entre les deux
- * repond a la question que se posent les parents ("est-ce que tout le temps
- * gagne est utilise ?") sans introduire une seconde couleur.
+ * Deux nuances d'une même teinte : la barre claire est le temps *accordé*,
+ * la barre foncee le temps reellement *consommé*. Le rapport entre les deux
+ * repond à la question que se posent les parents ("est-ce que tout le temps
+ * gagne est utilisé ?") sans introduire une seconde couleur.
  */
 export function ColumnTrend({ data, height = 168 }: { data: TrendPoint[]; height?: number }) {
   const { show, hide, node } = useChartTooltip();
 
   if (data.length === 0) {
-    return <p className="empty">Pas encore de temps d&apos;ecran enregistre.</p>;
+    return <p className="empty">Pas encore de temps d&apos;écran enregistré.</p>;
   }
 
   const width = Math.max(320, data.length * 34);
@@ -44,7 +44,7 @@ export function ColumnTrend({ data, height = 168 }: { data: TrendPoint[]; height
   return (
     <div className="chart-wrap">
       <div className="chart">
-        <svg width={width} height={height} role="img" aria-label="Temps d'ecran des 14 derniers jours">
+        <svg width={width} height={height} role="img" aria-label="Temps d'écran des 14 derniers jours">
           {ticks.map((tick) => (
             <g key={tick}>
               <line className="grid-line" x1={padLeft} x2={width - 8} y1={y(tick)} y2={y(tick)} />
@@ -72,9 +72,9 @@ export function ColumnTrend({ data, height = 168 }: { data: TrendPoint[]; height
                     <>
                       <strong>{label}</strong>
                       <br />
-                      Accorde : {minutes(point.granted_minutes)}
+                      Accordé : {minutes(point.granted_minutes)}
                       <br />
-                      Consomme : {minutes(point.consumed_minutes)}
+                      Consommé : {minutes(point.consumed_minutes)}
                       {point.sessions > 0 ? (
                         <>
                           <br />
@@ -121,10 +121,10 @@ export function ColumnTrend({ data, height = 168 }: { data: TrendPoint[]; height
       {node}
       <div className="legend" style={{ marginTop: 10 }}>
         <span className="legend-item">
-          <span className="legend-swatch" style={{ background: "var(--ordinal-1)" }} /> Temps accorde
+          <span className="legend-swatch" style={{ background: "var(--ordinal-1)" }} /> Temps accordé
         </span>
         <span className="legend-item">
-          <span className="legend-swatch" style={{ background: "var(--data-1)" }} /> Temps consomme
+          <span className="legend-swatch" style={{ background: "var(--data-1)" }} /> Temps consommé
         </span>
         <span className="muted small" style={{ marginLeft: "auto" }}>
           minutes par jour

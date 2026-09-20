@@ -2,8 +2,8 @@
  * Client HTTP du tableau de bord.
  *
  * Trois responsabilites : porter le jeton, rafraichir la session quand il
- * expire, et transformer les erreurs de l'API en objets exploitables par
- * l'interface (le message est deja redige en francais cote serveur).
+ * expiré, et transformer les erreurs de l'API en objets exploitables par
+ * l'interface (le message est déjà redige en français cote serveur).
  */
 
 import type {
@@ -99,7 +99,7 @@ async function request<T>(
   try {
     response = await fetch(`${API_URL}${path}`, { ...init, headers });
   } catch {
-    throw new ApiError(0, "network_error", "Le serveur est injoignable. Verifie que l'API tourne.");
+    throw new ApiError(0, "network_error", "Le serveur est injoignable. Vérifie que l'API tourne.");
   }
 
   if (response.status === 401 && retry && tokens.refresh) {

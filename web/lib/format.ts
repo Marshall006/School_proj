@@ -1,4 +1,4 @@
-/** Mise en forme francaise : durees, dates, scores. */
+/** Mise en forme francaise : durées, dates, scores. */
 
 export function minutes(total: number): string {
   if (total <= 0) return "0 min";
@@ -14,7 +14,7 @@ export function msToMinutes(ms: number): string {
 }
 
 export function countdown(seconds: number): string {
-  if (seconds <= 0) return "termine";
+  if (seconds <= 0) return "terminé";
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = seconds % 60;
@@ -60,13 +60,13 @@ export function relative(iso: string): string {
 }
 
 export const PERIOD_LABELS: Record<string, string> = {
-  school: "Periode scolaire",
+  school: "Période scolaire",
   weekend: "Week-end",
   holiday: "Vacances",
 };
 
 export const BAND_LABELS: Record<string, string> = {
-  unknown: "A decouvrir",
+  unknown: "A découvrir",
   fragile: "Fragile",
   en_cours: "En cours",
   acquis: "Acquis",
@@ -74,21 +74,21 @@ export const BAND_LABELS: Record<string, string> = {
 };
 
 export const KIND_LABELS: Record<string, string> = {
-  parent_direct: "Deverrouillage parental",
-  assessment_reward: "Evaluation reussie",
+  parent_direct: "Déverrouillage parental",
+  assessment_reward: "Évaluation réussie",
   xp_redeem: "Conversion d'XP",
   parent_bonus: "Bonus parental",
   emergency: "Deblocage de secours",
 };
 
 export const LOCKOUT_LABELS: Record<string, string> = {
-  failed_assessment: "Evaluation echouee",
+  failed_assessment: "Évaluation échouée",
   too_many_attempts: "Trop de tentatives",
   daily_cap: "Plafond quotidien",
   curfew: "Couvre-feu",
   parent_manual: "Decision parentale",
-  tamper_detected: "Anomalie detectee",
-  code_bruteforce: "Codes errones repetes",
+  tamper_detected: "Anomalie détectée",
+  code_bruteforce: "Codes erronés repetes",
 };
 
 export const AVATARS: Record<string, string> = {

@@ -6,7 +6,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "KODA — Tableau de bord parental",
   description:
-    "Le temps d'ecran se merite : suivez le niveau scolaire de votre enfant et debloquez la tablette en connaissance de cause.",
+    "Le temps d'écran se mérite : suivez le niveau scolaire de votre enfant et debloquez la tablette en connaissance de cause.",
 };
 
 export const viewport: Viewport = {

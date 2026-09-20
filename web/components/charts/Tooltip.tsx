@@ -8,7 +8,7 @@ export interface TooltipState {
   content: ReactNode;
 }
 
-/** Infobulle de graphique : suit le curseur, ne capte jamais les evenements. */
+/** Infobulle de graphique : suit le curseur, ne capte jamais les événements. */
 export function useChartTooltip() {
   const [tip, setTip] = useState<TooltipState | null>(null);
 

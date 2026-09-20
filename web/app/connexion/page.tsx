@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { Alert, Card } from "@/components/ui";
+import { IconBook, IconLock, IconStar } from "@/components/icons";
 
 export default function ConnexionPage() {
   const router = useRouter();
@@ -36,9 +37,7 @@ export default function ConnexionPage() {
         await register(form);
       }
     } catch (err) {
-      setError(
-        err instanceof ApiError ? err.message : "Une erreur inattendue est survenue.",
-      );
+      setError(err instanceof ApiError ? err.message : "Une erreur inattendue est survenue.");
     } finally {
       setBusy(false);
     }
@@ -50,67 +49,104 @@ export default function ConnexionPage() {
   return (
     <main className="auth-page">
       <div className="auth-card stack">
-        <div className="row" style={{ justifyContent: "center", marginBottom: 4 }}>
-          <span className="brand-mark" style={{ width: 42, height: 42, fontSize: 18 }}>
+        <div className="row" style={{ justifyContent: "center", marginBottom: 2 }}>
+          <span className="brand-mark" style={{ width: 46, height: 46, fontSize: 20 }}>
             K
           </span>
           <div>
-            <div className="brand-name" style={{ fontSize: "1.25rem" }}>
+            <div className="brand-name" style={{ fontSize: "1.375rem" }}>
               KODA
             </div>
-            <div className="brand-tagline">L&apos;ecran se merite.</div>
+            <div className="brand-tagline">L&apos;écran se mérite.</div>
           </div>
         </div>
 
+        <ul className="auth-pitch">
+          <li>
+            <IconLock size={16} />
+            La tablette reste verrouillée tant que le travail n&apos;est pas fait.
+          </li>
+          <li>
+            <IconBook size={16} />
+            L&apos;enfant passe une évaluation : réussie, elle ouvre l&apos;écran.
+          </li>
+          <li>
+            <IconStar size={16} />
+            Vous voyez où il progresse, et où il faut l&apos;aider.
+          </li>
+        </ul>
+
         <Card>
-          <div className="row" style={{ marginBottom: 16, gap: 6 }}>
+          <div className="segmented" style={{ marginBottom: 18, width: "100%" }}>
             <button
               type="button"
-              className={`btn btn-sm${mode === "login" ? " btn-primary" : ""}`}
+              aria-pressed={mode === "login"}
               onClick={() => setMode("login")}
+              style={{ flex: 1, justifyContent: "center" }}
             >
               Connexion
             </button>
             <button
               type="button"
-              className={`btn btn-sm${mode === "register" ? " btn-primary" : ""}`}
+              aria-pressed={mode === "register"}
               onClick={() => setMode("register")}
+              style={{ flex: 1, justifyContent: "center" }}
             >
-              Creer un foyer
+              Créer un foyer
             </button>
           </div>
 
-          <form className="stack" onSubmit={submit} style={{ gap: 13 }}>
+          <form className="stack" onSubmit={submit} style={{ gap: 14 }}>
             {mode === "register" && (
               <>
                 <div className="field">
-                  <label htmlFor="display_name">Votre prenom</label>
-                  <input id="display_name" required value={form.display_name} onChange={set("display_name")} />
+                  <label htmlFor="display_name">Votre prénom</label>
+                  <input
+                    id="display_name"
+                    required
+                    value={form.display_name}
+                    onChange={set("display_name")}
+                  />
                 </div>
                 <div className="field">
                   <label htmlFor="family_name">Nom du foyer</label>
-                  <input id="family_name" required value={form.family_name} onChange={set("family_name")} placeholder="Famille Diallo" />
+                  <input
+                    id="family_name"
+                    required
+                    value={form.family_name}
+                    onChange={set("family_name")}
+                    placeholder="Famille Diallo"
+                  />
                 </div>
                 <div className="field">
                   <label htmlFor="country">Pays</label>
                   <select
                     id="country"
                     value={form.country_code}
-                    onChange={(event) => setForm((c) => ({ ...c, country_code: event.target.value }))}
+                    onChange={(event) =>
+                      setForm((c) => ({ ...c, country_code: event.target.value }))
+                    }
                   >
                     <option value="FR">France</option>
-                    <option value="BJ">Benin</option>
-                    <option value="CI">Cote d&apos;Ivoire</option>
-                    <option value="SN">Senegal</option>
+                    <option value="BJ">Bénin</option>
+                    <option value="CI">Côte d&apos;Ivoire</option>
+                    <option value="SN">Sénégal</option>
                   </select>
-                  <span className="help">Determine les programmes scolaires proposes.</span>
+                  <span className="help">Détermine les programmes scolaires proposés.</span>
                 </div>
               </>
             )}
 
             <div className="field">
               <label htmlFor="email">Adresse e-mail</label>
-              <input id="email" type="email" required autoComplete="email" value={form.email} onChange={set("email")} />
+              <input
+                id="email"
+                type="email"
+                required
+                autoComplete="email"
+                value={form.email}
+                onChange={set("email")}
+              />
             </div>
             <div className="field">
               <label htmlFor="password">Mot de passe</label>
@@ -123,24 +159,21 @@ export default function ConnexionPage() {
                 value={form.password}
                 onChange={set("password")}
               />
-              {mode === "register" && <span className="help">8 caracteres minimum.</span>}
+              {mode === "register" && <span className="help">8 caractères minimum.</span>}
             </div>
 
             {error && <Alert tone="critical">{error}</Alert>}
 
             <button className="btn btn-primary btn-block" type="submit" disabled={busy}>
-              {busy ? "Un instant…" : mode === "login" ? "Se connecter" : "Creer le foyer"}
+              {busy ? "Un instant…" : mode === "login" ? "Se connecter" : "Créer le foyer"}
             </button>
           </form>
         </Card>
 
-        <Card>
-          <p className="small secondary">
-            <strong>Compte de demonstration</strong> — apres <code>make demo</code> :
-            <br />
-            <code>demo@koda.app</code> · <code>demo-koda-2026</code>
-          </p>
-        </Card>
+        <p className="small muted" style={{ textAlign: "center", lineHeight: 1.7 }}>
+          <strong>Compte de démonstration</strong> — après <code>make demo</code> :<br />
+          <code>demo@koda.app</code> · <code>demo-koda-2026</code>
+        </p>
       </div>
     </main>
   );

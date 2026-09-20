@@ -7,12 +7,21 @@ import { usePathname, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { AVATARS } from "@/lib/format";
+import {
+  IconCalendar,
+  IconCopies,
+  IconDevice,
+  IconHome,
+  IconLogout,
+  IconMoon,
+  IconSun,
+} from "@/components/icons";
 
 const LINKS = [
-  { href: "/foyer", label: "Vue d'ensemble", icon: "◧" },
-  { href: "/copies", label: "Copies a valider", icon: "✎" },
-  { href: "/appareils", label: "Appareils", icon: "▭" },
-  { href: "/calendrier", label: "Calendrier", icon: "▤" },
+  { href: "/foyer", label: "Vue d'ensemble", Icon: IconHome },
+  { href: "/copies", label: "Copies à valider", Icon: IconCopies },
+  { href: "/appareils", label: "Appareils", Icon: IconDevice },
+  { href: "/calendrier", label: "Calendrier", Icon: IconCalendar },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -43,8 +52,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }, []);
 
   function toggleTheme() {
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const next =
-      theme === "dark" ? "light" : theme === "light" ? "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "dark";
+      theme === "dark" ? "light" : theme === "light" ? "dark" : prefersDark ? "light" : "dark";
     setTheme(next);
     document.documentElement.dataset.theme = next;
     window.localStorage.setItem("koda.theme", next);
@@ -58,6 +68,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
+  const isDark =
+    theme === "dark" ||
+    (theme === null && typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+
   return (
     <div className="shell">
       <aside className="sidebar">
@@ -66,21 +80,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <span>
             <span className="brand-name">KODA</span>
             <br />
-            <span className="brand-tagline">L&apos;ecran se merite.</span>
+            <span className="brand-tagline">L&apos;écran se mérite.</span>
           </span>
         </Link>
 
         <nav className="nav">
-          {LINKS.map((link) => (
+          {LINKS.map(({ href, label, Icon }) => (
             <Link
-              key={link.href}
-              href={link.href}
+              key={href}
+              href={href}
               className="nav-item"
-              aria-current={pathname === link.href ? "page" : undefined}
+              aria-current={pathname === href ? "page" : undefined}
             >
-              <span aria-hidden="true">{link.icon}</span>
-              {link.label}
-              {link.href === "/copies" && pending > 0 && <span className="nav-badge">{pending}</span>}
+              <Icon size={18} />
+              {label}
+              {href === "/copies" && pending > 0 && <span className="nav-badge">{pending}</span>}
             </Link>
           ))}
 
@@ -93,7 +107,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               className="nav-item"
               aria-current={pathname.startsWith(`/enfants/${child.id}`) ? "page" : undefined}
             >
-              <span aria-hidden="true">{AVATARS[child.avatar] ?? "🙂"}</span>
+              <span aria-hidden="true" style={{ fontSize: 17, lineHeight: 1 }}>
+                {AVATARS[child.avatar] ?? "🙂"}
+              </span>
               {child.display_name}
               <span className="muted small" style={{ marginLeft: "auto" }}>
                 {child.grade_code}
@@ -104,17 +120,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
         <div className="spacer" />
 
-        <div className="stack" style={{ gap: 8 }}>
+        <div className="stack" style={{ gap: 10 }}>
           <button className="btn btn-sm" onClick={toggleTheme}>
-            {theme === "dark" ? "☀ Theme clair" : "☾ Theme sombre"}
+            {isDark ? <IconSun size={15} /> : <IconMoon size={15} />}
+            {isDark ? "Thème clair" : "Thème sombre"}
           </button>
-          <div className="small secondary" style={{ padding: "0 8px" }}>
-            {session.parent.display_name}
+          <div className="small secondary" style={{ padding: "0 8px", lineHeight: 1.4 }}>
+            <strong style={{ color: "var(--ink)" }}>{session.parent.display_name}</strong>
             <br />
             <span className="muted">{session.family.name}</span>
           </div>
           <button className="btn btn-sm" onClick={() => void logout()}>
-            Se deconnecter
+            <IconLogout size={15} />
+            Se déconnecter
           </button>
         </div>
       </aside>
